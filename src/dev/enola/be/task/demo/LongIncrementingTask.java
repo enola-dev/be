@@ -20,10 +20,16 @@ public class LongIncrementingTask extends Task<Input, Output> {
 
     @Override
     protected Output execute() throws Exception {
-        for (long i = 0; i < input.max; i++)
+        for (long i = 0; i < input.max; i++) {
             if (Thread.currentThread().isInterrupted())
                 throw new InterruptedException("Task was interrupted");
-        Thread.sleep(input.sleep.toMillis());
+            try {
+                Thread.sleep(input.sleep.toMillis());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new InterruptedException("Task was interrupted during sleep");
+            }
+        }
 
         // TODO Report % progress
 
