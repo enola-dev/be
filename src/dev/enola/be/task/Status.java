@@ -7,14 +7,14 @@ package dev.enola.be.task;
 public enum Status {
     PENDING,
     IN_PROGRESS,
-    COMPLETED,
+    SUCCESSFUL,
     FAILED,
     CANCELLED,
     TIMED_OUT;
 
     public boolean isTerminal() {
         return switch (this) {
-            case COMPLETED, FAILED, CANCELLED, TIMEDOUT -> true;
+            case SUCCESSFUL, FAILED, CANCELLED, TIMED_OUT -> true;
             case PENDING, IN_PROGRESS -> false;
         };
     }
