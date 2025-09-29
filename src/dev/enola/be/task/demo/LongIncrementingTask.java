@@ -21,6 +21,7 @@ public class LongIncrementingTask extends Task<Input, Output> {
     @Override
     protected Output execute() throws Exception {
         for (long i = 0; i < input.max; i++) {
+            Thread.yield();
             if (Thread.currentThread().isInterrupted())
                 throw new InterruptedException("Task was interrupted");
             try {

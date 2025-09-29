@@ -9,8 +9,7 @@ public enum Status {
     IN_PROGRESS,
     SUCCESSFUL,
     FAILED,
-    CANCELLED,
-    TIMED_OUT;
+    CANCELLED; // incl. TIMED_OUT
 
     public boolean isTerminal() {
         return switch (this) {
