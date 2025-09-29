@@ -1,31 +1,54 @@
 package dev.enola.be.task;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
-public interface Task<ID, I, O> {
-    // TODO extends Identifiable<TaskID>
+public abstract class Task<I, O> {
+
+    private final UUID id = UUID.randomUUID();
+    final AtomicReference<Future<O>> future = new AtomicReference<>();
+    protected final I input;
+
+    protected Task(I input) {
+        this.input = input;
+    }
+
+    protected abstract O execute() throws Exception;
 
     /** 🆔 */
-    ID id();
+    public final UUID id() {
+        return id;
+    }
 
-    I input();
+    public final I input() {
+        return input;
+    }
 
-    CompletableFuture<O> output();
+    public final Status status() {
+        var future = this.future.get();
+        if (future == null)
+            return Status.PENDING;
+        return switch (future.state()) {
+            case RUNNING -> Status.IN_PROGRESS;
+            case SUCCESS -> Status.SUCCESSFUL;
+            case FAILED -> Status.FAILED;
+            case CANCELLED -> Status.CANCELLED;
+        };
+    }
 
-    Status status();
+    // TODO Optional<Instant> startedAt();
 
-    void run() throws Exception;
-
-    Optional<Instant> startedAt();
-
-    Optional<Instant> endedAt();
+    // TODO Optional<Instant> endedAt();
 
     /** Progress, as 0-100%. */
-    int progress();
+    // TODO public int progress() {}
 
-    void cancel();
+    public void cancel() {
+        var f = future.get();
+        if (f != null)
+            f.cancel(true);
+    }
 
-    Set<Task<?, ?, ?>> dependencies();
+    // TODO Set<Task<?, ?, ?>> dependencies();
 }
