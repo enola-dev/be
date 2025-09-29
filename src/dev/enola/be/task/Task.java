@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+// TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
 
     private final UUID id = UUID.randomUUID();
