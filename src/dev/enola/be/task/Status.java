@@ -5,16 +5,16 @@ package dev.enola.be.task;
  * "https://www.mermaidchart.com/d/ef337271-7f85-4a77-8353-9e4a880efe2a">Status</a>.
  */
 public enum Status {
-    PENDING,
-    IN_PROGRESS,
-    SUCCESSFUL,
-    FAILED,
-    CANCELLED; // incl. TIMED_OUT
+  PENDING,
+  IN_PROGRESS,
+  SUCCESSFUL,
+  FAILED,
+  CANCELLED; // incl. TIMED_OUT
 
-    public boolean isTerminal() {
-        return switch (this) {
-            case SUCCESSFUL, FAILED, CANCELLED, TIMED_OUT -> true;
-            case PENDING, IN_PROGRESS -> false;
-        };
-    }
+  public boolean isTerminal() {
+    return switch (this) {
+      case SUCCESSFUL, FAILED, CANCELLED, TIMED_OUT -> true;
+      case PENDING, IN_PROGRESS -> false;
+    };
+  }
 }

@@ -7,49 +7,47 @@ import java.util.concurrent.atomic.AtomicReference;
 // TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
 
-    private final UUID id = UUID.randomUUID();
-    final AtomicReference<Future<O>> future = new AtomicReference<>();
-    protected final I input;
+  private final UUID id = UUID.randomUUID();
+  final AtomicReference<Future<O>> future = new AtomicReference<>();
+  protected final I input;
 
-    protected Task(I input) {
-        this.input = input;
-    }
+  protected Task(I input) {
+    this.input = input;
+  }
 
-    protected abstract O execute() throws Exception;
+  protected abstract O execute() throws Exception;
 
-    /** 🆔 */
-    public final UUID id() {
-        return id;
-    }
+  /** 🆔 */
+  public final UUID id() {
+    return id;
+  }
 
-    public final I input() {
-        return input;
-    }
+  public final I input() {
+    return input;
+  }
 
-    public final Status status() {
-        var future = this.future.get();
-        if (future == null)
-            return Status.PENDING;
-        return switch (future.state()) {
-            case RUNNING -> Status.IN_PROGRESS;
-            case SUCCESS -> Status.SUCCESSFUL;
-            case FAILED -> Status.FAILED;
-            case CANCELLED -> Status.CANCELLED;
-        };
-    }
+  public final Status status() {
+    var future = this.future.get();
+    if (future == null) return Status.PENDING;
+    return switch (future.state()) {
+      case RUNNING -> Status.IN_PROGRESS;
+      case SUCCESS -> Status.SUCCESSFUL;
+      case FAILED -> Status.FAILED;
+      case CANCELLED -> Status.CANCELLED;
+    };
+  }
 
-    // TODO Optional<Instant> startedAt();
+  // TODO Optional<Instant> startedAt();
 
-    // TODO Optional<Instant> endedAt();
+  // TODO Optional<Instant> endedAt();
 
-    /** Progress, as 0-100%. */
-    // TODO public int progress() {}
+  /** Progress, as 0-100%. */
+  // TODO public int progress() {}
 
-    public void cancel() {
-        var f = future.get();
-        if (f != null)
-            f.cancel(true);
-    }
+  public void cancel() {
+    var f = future.get();
+    if (f != null) f.cancel(true);
+  }
 
-    // TODO Set<Task<?, ?, ?>> dependencies();
+  // TODO Set<Task<?, ?, ?>> dependencies();
 }
