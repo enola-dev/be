@@ -5,32 +5,19 @@
 - **Total Test Cases**: 23 tests across 4 test classes
 - **Test Pass Rate**: 100% (23/23 passing)
 
-## Bugs Fixed ✓
+## Java Version
 
-### Critical Bugs (Compilation Failures)
-1. **Status.java** - Reference to non-existent `TIMED_OUT` enum value in `isTerminal()` method
-2. **Task.java** - Used Java 19+ `Future.state()` API incompatible with Java 17
-3. **TaskExecutor.java** - Used Java 19+ virtual threads API incompatible with Java 17
+This project targets **Java 25** and uses modern Java features:
+- Virtual Threads (`Executors.newVirtualThreadPerTaskExecutor()`)
+- `Future.state()` API for structured task status management
 
-### Bug Details
+## Bug Fixed ✓
 
-#### Bug #1: Status.java - Non-existent enum reference
+### Status.java - Non-existent Enum Reference
 - **Severity**: Critical (compilation error)
 - **Impact**: Code would not compile
 - **Root Cause**: `isTerminal()` method referenced `TIMED_OUT` which doesn't exist in the Status enum
 - **Fix**: Removed the non-existent reference from switch statement
-
-#### Bug #2: Task.java - Java version incompatibility
-- **Severity**: Critical (compilation error)
-- **Impact**: Code would not compile on Java 17
-- **Root Cause**: Used `Future.state()` method introduced in Java 19
-- **Fix**: Replaced with Java 17 compatible approach using `isDone()`, `isCancelled()`, and exception handling
-
-#### Bug #3: TaskExecutor.java - Virtual threads incompatibility
-- **Severity**: Critical (compilation error)
-- **Impact**: Code would not compile on Java 17
-- **Root Cause**: Used `Executors.newVirtualThreadPerTaskExecutor()` introduced in Java 19
-- **Fix**: Replaced with `Executors.newCachedThreadPool()` available in Java 17
 
 ## Test Coverage Details
 
@@ -71,24 +58,24 @@
 - Provides clear pass/fail output
 
 ### Documentation
+- `AGENTS.md` - Instructions for AI agents stating Java 25 target
 - `TEST_DOCUMENTATION.md` - Comprehensive test documentation
-- Documents all bugs found and fixed
-- Describes test coverage
-- Provides instructions for running tests
+- Documents bug fixed, test coverage, and how to run tests
 
 ## Impact
 
 ### Before
-- ❌ Code did not compile on Java 17
+- ❌ Code did not compile (Status.java had reference to non-existent TIMED_OUT)
 - ❌ No test coverage
-- ❌ Multiple critical bugs present
+- ❌ Critical bug present
 
 ### After
-- ✅ Code compiles successfully on Java 17
+- ✅ Code compiles successfully on Java 25
 - ✅ Comprehensive test coverage (23 tests, 100% passing)
-- ✅ All critical bugs fixed
+- ✅ Bug fixed in Status.java
 - ✅ Automated test runner available
 - ✅ Full documentation of changes
+- ✅ AGENTS.md clarifies Java 25 target
 
 ## How to Run Tests
 
@@ -101,8 +88,9 @@ This will compile all code and run all 23 tests, reporting success or failure.
 ## Verification
 
 All changes have been verified:
-1. ✅ Code compiles without errors
+1. ✅ Code compiles without errors on Java 25
 2. ✅ All 23 tests pass
 3. ✅ No build artifacts committed
-4. ✅ Changes are minimal and focused on the issues
+4. ✅ Changes are minimal and focused on the issue
 5. ✅ Documentation is complete
+6. ✅ AGENTS.md clarifies Java 25 requirement

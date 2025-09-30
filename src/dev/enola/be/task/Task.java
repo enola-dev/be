@@ -30,18 +30,12 @@ public abstract class Task<I, O> {
         var future = this.future.get();
         if (future == null)
             return Status.PENDING;
-        if (future.isCancelled())
-            return Status.CANCELLED;
-        if (future.isDone()) {
-            // Check if it failed or succeeded
-            try {
-                future.get();
-                return Status.SUCCESSFUL;
-            } catch (Exception e) {
-                return Status.FAILED;
-            }
-        }
-        return Status.IN_PROGRESS;
+        return switch (future.state()) {
+            case RUNNING -> Status.IN_PROGRESS;
+            case SUCCESS -> Status.SUCCESSFUL;
+            case FAILED -> Status.FAILED;
+            case CANCELLED -> Status.CANCELLED;
+        };
     }
 
     // TODO Optional<Instant> startedAt();

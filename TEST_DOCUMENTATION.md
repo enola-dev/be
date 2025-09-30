@@ -1,11 +1,17 @@
 # Test Documentation
 
 ## Overview
-This document describes the test coverage added to the BE project and the bugs fixed.
+This document describes the test coverage added to the BE project and the bug fixed.
 
-## Bugs Fixed
+## Java Version
 
-### 1. Status.java - Reference to Non-Existent Enum Value
+This project targets **Java 25** and uses modern Java features including:
+- Virtual Threads (`Executors.newVirtualThreadPerTaskExecutor()`)
+- `Future.state()` API
+
+## Bug Fixed
+
+### Status.java - Reference to Non-Existent Enum Value
 **Location:** `src/dev/enola/be/task/Status.java`, line 16  
 **Issue:** The `isTerminal()` method referenced `TIMED_OUT` enum value which doesn't exist in the Status enum.  
 **Fix:** Removed the non-existent `TIMED_OUT` reference from the switch statement.
@@ -18,51 +24,6 @@ case SUCCESSFUL, FAILED, CANCELLED, TIMED_OUT -> true;
 **After:**
 ```java
 case SUCCESSFUL, FAILED, CANCELLED -> true;
-```
-
-### 2. Task.java - Java 19+ API Used with Java 17
-**Location:** `src/dev/enola/be/task/Task.java`, line 33  
-**Issue:** Used `Future.state()` method which was introduced in Java 19, but project runs on Java 17.  
-**Fix:** Replaced with Java 17 compatible methods using `isDone()`, `isCancelled()`, and `get()`.
-
-**Before:**
-```java
-return switch (future.state()) {
-    case RUNNING -> Status.IN_PROGRESS;
-    case SUCCESS -> Status.SUCCESSFUL;
-    case FAILED -> Status.FAILED;
-    case CANCELLED -> Status.CANCELLED;
-};
-```
-
-**After:**
-```java
-if (future.isCancelled())
-    return Status.CANCELLED;
-if (future.isDone()) {
-    try {
-        future.get();
-        return Status.SUCCESSFUL;
-    } catch (Exception e) {
-        return Status.FAILED;
-    }
-}
-return Status.IN_PROGRESS;
-```
-
-### 3. TaskExecutor.java - Java 19+ Virtual Threads Used with Java 17
-**Location:** `src/dev/enola/be/task/TaskExecutor.java`, line 24  
-**Issue:** Used `Executors.newVirtualThreadPerTaskExecutor()` which was introduced in Java 19 for virtual threads.  
-**Fix:** Replaced with `Executors.newCachedThreadPool()` which is available in Java 17.
-
-**Before:**
-```java
-private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-```
-
-**After:**
-```java
-private final ExecutorService executor = Executors.newCachedThreadPool();
 ```
 
 ## Test Coverage Added
@@ -116,11 +77,13 @@ The script will:
 4. Run all test suites
 5. Report results
 
+**Note:** Tests require Java 25 to run due to the use of virtual threads and `Future.state()` API.
+
 All tests must pass for a successful run.
 
 ## Test Results
 
-All tests pass successfully on Java 17:
+All tests pass successfully on Java 25:
 - **StatusTest**: 6/6 tests passed ✓
 - **TaskTest**: 5/5 tests passed ✓
 - **TaskExecutorTest**: 8/8 tests passed ✓
@@ -134,3 +97,4 @@ All tests pass successfully on Java 17:
 - Tests are written without external dependencies (no JUnit)
 - Tests provide clear output showing which tests passed
 - The test framework is minimal but effective for this project's needs
+- Tests require Java 25 features (virtual threads, Future.state())
