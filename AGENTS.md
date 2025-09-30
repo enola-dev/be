@@ -24,3 +24,5 @@ Note: Tests require Java 25 to compile and run due to the use of modern Java fea
 - Follow existing code patterns in the repository
 - Maintain minimal, focused changes
 - Keep test coverage comprehensive but concise
+- Use `var` for local variables wherever possible to reduce verbosity
+- Avoid `System.out.println` in test code - tests should be silent unless they fail

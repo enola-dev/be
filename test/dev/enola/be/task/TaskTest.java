@@ -39,48 +39,39 @@ public class TaskTest {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Running TaskTest...");
-        
         testTaskHasUniqueId();
         testTaskInputIsStored();
         testInitialStatusIsPending();
         testTaskIdIsNotNull();
         testMultipleTasksHaveDifferentIds();
-        
-        System.out.println("All TaskTest tests passed! ✓");
     }
     
     private static void testTaskHasUniqueId() {
-        SimpleTask task = new SimpleTask("test");
-        UUID id = task.id();
+        var task = new SimpleTask("test");
+        var id = task.id();
         assert id != null : "Task ID should not be null";
-        System.out.println("  ✓ testTaskHasUniqueId");
     }
     
     private static void testTaskInputIsStored() {
-        String input = "test input";
-        SimpleTask task = new SimpleTask(input);
+        var input = "test input";
+        var task = new SimpleTask(input);
         assert task.input().equals(input) : "Task input should match";
-        System.out.println("  ✓ testTaskInputIsStored");
     }
     
     private static void testInitialStatusIsPending() {
-        SimpleTask task = new SimpleTask("test");
-        Status status = task.status();
+        var task = new SimpleTask("test");
+        var status = task.status();
         assert status == Status.PENDING : "Initial status should be PENDING, got " + status;
-        System.out.println("  ✓ testInitialStatusIsPending");
     }
     
     private static void testTaskIdIsNotNull() {
-        SimpleTask task = new SimpleTask("test");
+        var task = new SimpleTask("test");
         assert task.id() != null : "Task ID should never be null";
-        System.out.println("  ✓ testTaskIdIsNotNull");
     }
     
     private static void testMultipleTasksHaveDifferentIds() {
-        SimpleTask task1 = new SimpleTask("test1");
-        SimpleTask task2 = new SimpleTask("test2");
+        var task1 = new SimpleTask("test1");
+        var task2 = new SimpleTask("test2");
         assert !task1.id().equals(task2.id()) : "Different tasks should have different IDs";
-        System.out.println("  ✓ testMultipleTasksHaveDifferentIds");
     }
 }
