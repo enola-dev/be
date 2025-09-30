@@ -21,7 +21,7 @@ public class TaskExecutor implements AutoCloseable {
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
     // TODO Use dev.enola.common.concurrent; with logging, etc.
-    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public <O> Future<O> submit(Task<?, O> task) {
         tasks.put(task.id(), task);
