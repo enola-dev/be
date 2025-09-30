@@ -2,13 +2,15 @@ package dev.enola.be.task.demo;
 
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+
 import dev.enola.be.task.Task;
 import dev.enola.be.task.demo.LongIncrementingTask.Input;
 import dev.enola.be.task.demo.LongIncrementingTask.Output;
 
 public class LongIncrementingTask extends Task<Input, Output> {
 
-    record Input(long max, Duration sleep) {
+    record Input(long max, @Nullable Duration sleep) {
     }
 
     record Output(long result) {
@@ -24,11 +26,14 @@ public class LongIncrementingTask extends Task<Input, Output> {
             Thread.yield();
             if (Thread.currentThread().isInterrupted())
                 throw new InterruptedException("Task was interrupted");
-            try {
-                Thread.sleep(input.sleep.toMillis());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new InterruptedException("Task was interrupted during sleep");
+            Duration sleep = input.sleep;
+            if (sleep != null) {
+                try {
+                    Thread.sleep(sleep.toMillis());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new InterruptedException("Task was interrupted during sleep");
+                }
             }
         }
 

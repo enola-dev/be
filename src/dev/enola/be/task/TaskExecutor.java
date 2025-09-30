@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.jspecify.annotations.Nullable;
+
 public class TaskExecutor implements AutoCloseable {
 
     // TODO Synthetic "root" task, to which all running tasks are children?

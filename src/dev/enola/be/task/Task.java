@@ -4,14 +4,16 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jspecify.annotations.Nullable;
+
 // TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
 
     private final UUID id = UUID.randomUUID();
     final AtomicReference<Future<O>> future = new AtomicReference<>();
-    protected final I input;
+    protected final @Nullable I input;
 
-    protected Task(I input) {
+    protected Task(@Nullable I input) {
         this.input = input;
     }
 
@@ -22,7 +24,7 @@ public abstract class Task<I, O> {
         return id;
     }
 
-    public final I input() {
+    public final @Nullable I input() {
         return input;
     }
 
