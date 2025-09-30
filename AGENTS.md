@@ -11,7 +11,7 @@ This project targets **Java 25** and uses features introduced in Java 19+, inclu
 
 ## Testing
 
-Tests are located in the `test/` directory and can be run using:
+Tests can be run using:
 
 ```bash
 ./run-tests.sh
