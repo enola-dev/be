@@ -1,44 +1,12 @@
 package dev.enola.be.task;
 
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Future;
+
+import dev.enola.be.task.test.ImmediateTask;
+import dev.enola.be.task.test.FailingTask;
+import dev.enola.be.task.test.SlowTask;
 
 public class TaskExecutorTest {
-
-    static class SimpleTask extends Task<String, String> {
-        protected SimpleTask(String input) {
-            super(input);
-        }
-
-        @Override
-        protected String execute() throws Exception {
-            return "Result: " + input;
-        }
-    }
-    
-    static class FailingTask extends Task<String, String> {
-        protected FailingTask(String input) {
-            super(input);
-        }
-
-        @Override
-        protected String execute() throws Exception {
-            throw new RuntimeException("Intentional failure");
-        }
-    }
-    
-    static class SlowTask extends Task<String, String> {
-        protected SlowTask(String input) {
-            super(input);
-        }
-
-        @Override
-        protected String execute() throws Exception {
-            Thread.sleep(1000); // Sleep for 1 second
-            return "Completed: " + input;
-        }
-    }
 
     public static void main(String[] args) throws Exception {
         testSubmitTask();
@@ -53,10 +21,8 @@ public class TaskExecutorTest {
     
     private static void testSubmitTask() throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task = new SimpleTask("test");
+            var task = new ImmediateTask("test");
             var future = executor.submit(task);
-            
-            assert future != null : "Future should not be null";
             var result = future.get();
             assert result.equals("Result: test") : "Result should match expected output";
         }
@@ -64,12 +30,11 @@ public class TaskExecutorTest {
     
     private static void testGetTask() throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task = new SimpleTask("test");
+            var task = new ImmediateTask("test");
             var taskId = task.id();
             executor.submit(task);
             
             var retrieved = executor.get(taskId);
-            assert retrieved != null : "Retrieved task should not be null";
             assert retrieved.id().equals(taskId) : "Retrieved task ID should match";
         }
     }
@@ -88,8 +53,8 @@ public class TaskExecutorTest {
     
     private static void testListTasks() throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task1 = new SimpleTask("test1");
-            var task2 = new SimpleTask("test2");
+            var task1 = new ImmediateTask("test1");
+            var task2 = new ImmediateTask("test2");
             
             executor.submit(task1);
             executor.submit(task2);
@@ -103,25 +68,20 @@ public class TaskExecutorTest {
     
     private static void testTaskStatusProgression() throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task = new SlowTask("test");
+            var task = new SlowTask("test", 1000);
             
-            // Initial status should be PENDING
             assert task.status() == Status.PENDING : "Initial status should be PENDING";
             
             var future = executor.submit(task);
             
-            // Give it a moment to start
             Thread.sleep(100);
             
-            // Should be IN_PROGRESS or already done
             var status = task.status();
             assert status == Status.IN_PROGRESS || status == Status.SUCCESSFUL : 
                 "Status should be IN_PROGRESS or SUCCESSFUL, got " + status;
             
-            // Wait for completion
             future.get();
             
-            // Should be SUCCESSFUL
             assert task.status() == Status.SUCCESSFUL : "Final status should be SUCCESSFUL";
         }
     }
@@ -138,7 +98,6 @@ public class TaskExecutorTest {
                 // Expected
             }
             
-            // Give it a moment to update status
             Thread.sleep(100);
             
             assert task.status() == Status.FAILED : "Status should be FAILED after exception";
@@ -147,16 +106,13 @@ public class TaskExecutorTest {
     
     private static void testCancelTask() throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task = new SlowTask("test");
+            var task = new SlowTask("test", 1000);
             var future = executor.submit(task);
             
-            // Give it a moment to start
             Thread.sleep(100);
             
-            // Cancel the task
             task.cancel();
             
-            // Give it a moment to process cancellation
             Thread.sleep(100);
             
             assert task.status() == Status.CANCELLED : "Status should be CANCELLED after cancel()";
@@ -166,12 +122,9 @@ public class TaskExecutorTest {
     
     private static void testExecutorClose() throws Exception {
         var executor = new TaskExecutor();
-        var task = new SimpleTask("test");
+        var task = new ImmediateTask("test");
         executor.submit(task);
         
         executor.close();
-        
-        // After closing, the executor should shutdown
-        // We can't directly test the internal state, but we verified it doesn't throw
     }
 }
