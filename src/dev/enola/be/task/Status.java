@@ -13,7 +13,7 @@ public enum Status {
 
     public boolean isTerminal() {
         return switch (this) {
-            case SUCCESSFUL, FAILED, CANCELLED, TIMED_OUT -> true;
+            case SUCCESSFUL, FAILED, CANCELLED -> true;
             case PENDING, IN_PROGRESS -> false;
         };
     }
