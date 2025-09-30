@@ -9,4 +9,4 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-      - run: ./run-tests.sh
+      - run: ./test.sh

@@ -14,7 +14,7 @@ This project targets **Java 25** and uses features introduced in Java 19+, inclu
 Tests can be run using:
 
 ```bash
-./run-tests.sh
+./test.sh
 ```
 
 Note: Tests require Java 25 to compile and run due to the use of modern Java features.
