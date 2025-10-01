@@ -32,8 +32,7 @@ public class TaskExecutor implements AutoCloseable {
 
     public Task<?, ?> get(UUID id) {
         var task = tasks.get(id);
-        if (task == null)
-            throw new IllegalArgumentException("No such task: " + id);
+        if (task == null) throw new IllegalArgumentException("No such task: " + id);
         return task;
     }
 
@@ -44,7 +43,6 @@ public class TaskExecutor implements AutoCloseable {
     @Override
     public void close() throws Exception {
         executor.shutdown();
-        if (!executor.awaitTermination(7, TimeUnit.SECONDS))
-            executor.shutdownNow();
+        if (!executor.awaitTermination(7, TimeUnit.SECONDS)) executor.shutdownNow();
     }
 }
