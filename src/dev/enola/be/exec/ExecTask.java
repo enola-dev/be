@@ -1,12 +1,12 @@
 package dev.enola.be.exec;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-
 import dev.enola.be.exec.ExecTask.Input;
 import dev.enola.be.exec.ExecTask.Output;
 import dev.enola.be.task.Task;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 public class ExecTask extends Task<Input, Output> {
 
@@ -19,8 +19,7 @@ public class ExecTask extends Task<Input, Output> {
     }
 
     // TODO Replace String with... Stream, or enola.dev.io.Resource, File/Path.
-    record Output(int exitCode, String stdout, String stderr) {
-    }
+    record Output(int exitCode, String stdout, String stderr) {}
 
     protected ExecTask(Input input) {
         super(input);

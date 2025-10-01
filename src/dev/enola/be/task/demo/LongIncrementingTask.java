@@ -1,18 +1,16 @@
 package dev.enola.be.task.demo;
 
-import java.time.Duration;
-
 import dev.enola.be.task.Task;
 import dev.enola.be.task.demo.LongIncrementingTask.Input;
 import dev.enola.be.task.demo.LongIncrementingTask.Output;
 
+import java.time.Duration;
+
 public class LongIncrementingTask extends Task<Input, Output> {
 
-    record Input(long max, Duration sleep) {
-    }
+    record Input(long max, Duration sleep) {}
 
-    record Output(long result) {
-    }
+    record Output(long result) {}
 
     protected LongIncrementingTask(Input input) {
         super(input);

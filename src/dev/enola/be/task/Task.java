@@ -28,8 +28,7 @@ public abstract class Task<I, O> {
 
     public final Status status() {
         var future = this.future.get();
-        if (future == null)
-            return Status.PENDING;
+        if (future == null) return Status.PENDING;
         return switch (future.state()) {
             case RUNNING -> Status.IN_PROGRESS;
             case SUCCESS -> Status.SUCCESSFUL;
@@ -47,8 +46,7 @@ public abstract class Task<I, O> {
 
     public void cancel() {
         var f = future.get();
-        if (f != null)
-            f.cancel(true);
+        if (f != null) f.cancel(true);
     }
 
     // TODO Set<Task<?, ?, ?>> dependencies();

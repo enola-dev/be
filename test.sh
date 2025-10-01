@@ -11,3 +11,9 @@ find test -name '*.java' -print0 | xargs -0 javac -cp .build/classes -d .build/t
 java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.StatusTest
 java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.TaskTest
 java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.TaskExecutorTest
+
+if command -v pre-commit &> /dev/null
+then
+    # pre-commit run
+    pre-commit install
+fi
