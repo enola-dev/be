@@ -49,7 +49,7 @@ public abstract class Task<I, O> {
     }
 
     /**
-     * Awaits the completion of the task (as in {@link Status#COMPLETED}, and returns its output.
+     * Awaits the completion of the task (as in {@link Status#COMPLETED}), and returns its output.
      *
      * <p>This method can only be called after the task has been submitted to {@link
      * TaskExecutor#async(Task)}. If you need the result immediately after submission anyway,
