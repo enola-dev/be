@@ -28,6 +28,6 @@ Note: Tests require Java 25 to compile and run due to the use of modern Java fea
 - Avoid `System.out.println` in test code - tests should be silent unless they fail
 - Inline simple method calls and arguments unless they are reused
 - Avoid explicit null checks - rely on NullPointerExceptions to catch null issues
-- Use full file extensions (e.g., `*.yaml` not `*.yml`, but NOT `*.markdown` instead of `*.md`) - it's 2025!
+- Use full file extensions (e.g., `*.yaml` not `*.yml`, but `*.md` instead of `*.markdown`) - it's 2025!
 - Do not suggest to always use braces `{}` with `if` statements for single-line blocks
 - Do accept and not comment on the use of `assert` in `*Test.java` files
