@@ -1,7 +1,10 @@
 package dev.enola.be.task;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -37,6 +40,20 @@ public abstract class Task<I, O> {
 
     public final I input() {
         return input;
+    }
+
+    public final Optional<O> output() {
+        if (status() != Status.COMPLETED) return Optional.empty();
+        Future<O> f = future.get(); // This is immediate, and won't fail
+        if (!f.isDone()) throw new IllegalStateException("WTF?! " + f);
+
+        try {
+            return Optional.of(f.get());
+
+            // TODO Re-use code from TaskExecutor.await() here...
+        } catch (CancellationException | InterruptedException | ExecutionException e) {
+            throw new IllegalStateException("Huh?!", e);
+        }
     }
 
     public final Status status() {
@@ -75,13 +92,22 @@ public abstract class Task<I, O> {
 
     @Override
     public String toString() {
-        return "type: Task # "
-                + getClass().getSimpleName()
-                + "\nid: "
-                + id()
-                + "\ninput: "
-                + input()
-                + "\nstatus: "
-                + status();
+        var sb = new StringBuilder();
+        sb.append("type: Task # ");
+        sb.append(getClass().getSimpleName());
+        sb.append("\nid: ");
+        sb.append(id());
+        sb.append("\ninput: ");
+        sb.append(input());
+        sb.append("\nstatus: ");
+        sb.append(status());
+
+        var output = output();
+        if (output.isPresent()) {
+            sb.append("\noutput: ");
+            sb.append(output.get());
+        }
+
+        return sb.toString();
     }
 }
