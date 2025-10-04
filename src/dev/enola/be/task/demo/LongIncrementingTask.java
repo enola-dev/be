@@ -43,7 +43,10 @@ public class LongIncrementingTask extends Task<Input, Output> {
 
     private static void simpleLoop(long max, Duration sleep) throws InterruptedException {
         var start = Instant.now();
-        for (long i = 0; i < max; i++) Threads.sleep(sleep);
+        for (long i = 0; i < max; i++) {
+            // Thread.yield();
+            Threads.sleep(sleep);
+        }
         var duration = Duration.between(start, Instant.now());
         System.out.println(
                 "Looped to "
@@ -57,17 +60,21 @@ public class LongIncrementingTask extends Task<Input, Output> {
     public static void main(String[] args) throws InterruptedException {
         JulConfigurer.configureRootLogger();
 
-        // Count to max, with 1ms pause between each increment
-        var max = 10000;
+        // Count to max, with sleep pause between each increment
+        var max = 1000000L;
         var sleep = Duration.ofMillis(0);
 
         var input = new Input(max, sleep);
-        var pumper = new NonBlockingLineWriter(10000, LineWriters.SYSTEM_OUT);
-        var task = new LongIncrementingTask(input, pumper::println);
+        var pumperTask = new NonBlockingLineWriter(13, LineWriters.SYSTEM_OUT);
+        var printingTask = new LongIncrementingTask(input, pumperTask::println);
+        var silentTask = new LongIncrementingTask(input, LineWriters.NOOP::println);
+
         try (var executor = new TaskExecutor()) {
-            executor.async(pumper);
-            executor.async(new LongIncrementingTask(input, LineWriters.NOOP::println));
-            executor.await(task);
+            executor.async(pumperTask);
+            executor.async(silentTask);
+
+            executor.await(printingTask);
+            silentTask.await();
 
             simpleLoop(max, sleep);
         }

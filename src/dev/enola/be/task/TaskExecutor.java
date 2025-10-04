@@ -2,18 +2,22 @@ package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.util.Collection;
-import java.util.List;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Logger;
 
 public class TaskExecutor implements AutoCloseable {
+
+    private static final Logger LOG = Logger.getLogger(TaskExecutor.class.getName());
 
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
@@ -25,6 +29,28 @@ public class TaskExecutor implements AutoCloseable {
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
     private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
+
+    // TODO Can the timeoutScheduler also use virtual threads?
+    //   (Would need to check if ScheduledExecutorService supports that.)
+    //
+    // TODO Either way, use LoggingScheduledExecutorService from Enola Commons?
+    private final ScheduledExecutorService timeoutScheduler =
+            Executors.newSingleThreadScheduledExecutor();
+
+    private static class LoggingFutureTask<V> extends FutureTask<V> {
+        private final Task<?, V> task;
+
+        public LoggingFutureTask(Callable<V> callable, Task<?, V> task) {
+            super(callable);
+            this.task = task;
+        }
+
+        @Override
+        protected void done() {
+            task.endedAt(Instant.now());
+            LOG.fine(() -> task.toString());
+        }
+    }
 
     private <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
         if (tasks.putIfAbsent(task.id(), task) != null)
@@ -38,27 +64,19 @@ public class TaskExecutor implements AutoCloseable {
                 throw new IllegalStateException(
                         "Task " + task.id() + " not PENDING: " + task.status());
 
-            Future<O> future;
-            var timeout = task.timeout();
             Callable<O> callable = new TaskCallable<>(task);
-            if (timeout.isZero() || timeout.isNegative()) {
-                future = executor.submit(callable);
-            } else {
-                Collection<? extends Callable<O>> callables = List.of(callable);
-                try {
-                    // Nota bene: The risk of toMillis() throwing an ArithmeticException is
-                    // unrealistically low, as that would require a timeout of more than ~292
-                    // million years... :-) But if that ever happens, we want to know about it,
-                    // hence no try/catch here.
-                    var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
-                    future = futures.iterator().next();
-                } catch (InterruptedException e) {
-                    future = CompletableFuture.failedFuture(e);
-                    Thread.currentThread().interrupt();
-                }
+            var futureTask = new LoggingFutureTask<>(callable, task);
+
+            executor.execute(futureTask);
+
+            var timeout = task.timeout();
+            if (!timeout.isZero() && !timeout.isNegative()) {
+                timeoutScheduler.schedule(
+                        () -> futureTask.cancel(true), timeout.toMillis(), MILLISECONDS);
             }
-            task.future(future);
-            return future;
+
+            task.future(futureTask);
+            return futureTask;
         }
     }
 
@@ -105,5 +123,6 @@ public class TaskExecutor implements AutoCloseable {
     @Override
     public void close() {
         TaskExecutorServices.close(executor);
+        TaskExecutorServices.close(timeoutScheduler);
     }
 }
