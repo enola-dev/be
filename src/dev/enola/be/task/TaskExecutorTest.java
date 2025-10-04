@@ -34,6 +34,13 @@ public class TaskExecutorTest {
             var output = task.output().get();
             assert result == output : "The result and output objects must be the same";
             assert "Result: test".equals(result) : "Result should match expected output";
+
+            var toString = task.toString();
+            assert toString.contains("ImmediateTask") : "toString should contain class name";
+            assert toString.contains("id: " + task.id().toString()) : "toString should contain ID";
+            assert toString.contains("input: test") : "toString should contain input";
+            assert toString.contains("output: Result: test") : "toString should contain output";
+            assert toString.contains("status: COMPLETED") : "toString should contain COMPLETED";
         }
     }
 
@@ -56,6 +63,10 @@ public class TaskExecutorTest {
             }
 
             assert task.status() == Status.FAILED : "Status should be FAILED after exception";
+
+            var toString = task.toString();
+            assert !toString.contains("output") : "toString should not contain output";
+            assert toString.contains("status: FAILED") : "toString should contain FAILED";
         }
     }
 
@@ -73,6 +84,10 @@ public class TaskExecutorTest {
             }
             assert task.status() == Status.CANCELLED
                     : "Status should now be CANCELLED, but is " + task.status();
+
+            var toString = task.toString();
+            assert !toString.contains("output") : "toString should not contain output";
+            assert toString.contains("status: CANCELLED") : "toString should contain CANCELLED";
         }
     }
 
@@ -139,17 +154,19 @@ public class TaskExecutorTest {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000);
 
-            assert task.status() == Status.PENDING : "Initial status should be PENDING";
+            assert task.status() == Status.PENDING : "Status should be PENDING: " + task.status();
+            assert task.toString().contains("status: PENDING") : "toString !PENDING";
 
             var future = executor.future(task);
 
             var status = task.status();
-            assert status == Status.IN_PROGRESS
-                    : "Status should still be IN_PROGRESS, got " + status;
+            assert status == Status.IN_PROGRESS : "Status should be IN_PROGRESS, got " + status;
+            assert task.toString().contains("status: IN_PROGRESS") : "toString !IN_PROGRESS";
 
             future.get();
 
             assert task.status() == Status.COMPLETED : "Final status should be COMPLETED";
+            assert task.toString().contains("status: COMPLETED") : "toString !COMPLETED";
         }
     }
 
