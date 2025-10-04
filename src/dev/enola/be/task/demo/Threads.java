@@ -19,7 +19,7 @@ final class Threads {
      * article</a>, or <a
      * href="https://www.yegor256.com/2015/10/20/interrupted-exception.html">yegor256.com Blog
      * Post</a> and <a href="https://github.com/google/guava/issues/1219">Google Guava Issue
-     * #1219</a>, as well as {@link Uninterruptibles#sleepUninterruptibly(Duration)} (which does
+     * #1219</a>, as well as Google Guava's Uninterruptibles.sleepUninterruptibly(Duration) (which does
      * something different from this).
      *
      * @param duration Duration to sleep
