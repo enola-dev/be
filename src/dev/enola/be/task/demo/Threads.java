@@ -23,7 +23,7 @@ final class Threads {
      * something different from this).
      *
      * @param duration Duration to sleep
-     * @throws UncheckedInterruptedException if interrupted
+     * @throws InterruptedException if interrupted
      * @throws IllegalArgumentException if duration is negative
      */
     public static void sleep(Duration duration) throws InterruptedException {
