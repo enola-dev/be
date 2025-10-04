@@ -1,6 +1,7 @@
 package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,13 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 public class TaskExecutor implements AutoCloseable {
 
@@ -87,7 +88,7 @@ public class TaskExecutor implements AutoCloseable {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new UncheckedTaskAwaitException("Task canceled", e);
+            throw new UncheckedTaskAwaitException("Task interrupted execution", e);
 
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -103,6 +104,9 @@ public class TaskExecutor implements AutoCloseable {
             }
             throw new UncheckedTaskAwaitException(
                     "Task execution failed: " + cause.getMessage(), cause);
+
+        } catch (CancellationException e) {
+            throw new UncheckedTaskAwaitException("Task cancelled", e);
         }
     }
 
@@ -120,9 +124,22 @@ public class TaskExecutor implements AutoCloseable {
     }
 
     @Override
-    public void close() throws InterruptedException {
+    public void close() {
         executor.shutdown();
-        if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS))
+        try {
+            // Wait for existing tasks to terminate
+            if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, SECONDS)) {
+
+                // Cancel currently executing tasks
+                executor.shutdownNow();
+            }
+
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
             executor.shutdownNow();
+
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 }

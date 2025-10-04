@@ -56,7 +56,10 @@ public class TaskExecutorTest {
             try {
                 executor.await(task);
                 assert false : "Should have thrown an exception due to timeout";
-            } catch (CancellationException e) {
+
+            } catch (UncheckedTaskAwaitException e) {
+                assert e.getCause() instanceof CancellationException
+                        : "Cause should be CancellationException";
                 // Expected
             }
             assert task.status() == Status.CANCELLED
