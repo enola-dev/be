@@ -42,22 +42,12 @@ public abstract class Task<I, O> {
 
     public final Optional<O> output() {
         if (status() != Status.COMPLETED) return Optional.empty();
-        Future<O> f = future.get(); // This is immediate, and won't fail
-        // But let's be defensive - even though neither should ever happen
-        if (f == null) throw new IllegalStateException("WTF?! " + this);
-        if (!f.isDone()) throw new IllegalStateException("WTF?! " + f);
-
-        return Optional.of(f.resultNow());
+        return Optional.of(future.get().resultNow());
     }
 
     public final Optional<Throwable> failure() {
         if (status() != Status.FAILED) return Optional.empty();
-        Future<O> f = future.get(); // This is immediate, and won't fail
-        // But let's be defensive - even though neither should ever happen
-        if (f == null) throw new IllegalStateException("WTF?! " + this);
-        if (!f.isDone()) throw new IllegalStateException("WTF?! " + f);
-
-        return Optional.of(f.exceptionNow());
+        return Optional.of(future.get().exceptionNow());
     }
 
     public final Status status() {
