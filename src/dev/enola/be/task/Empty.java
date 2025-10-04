@@ -6,6 +6,7 @@ package dev.enola.be.task;
  */
 public final class Empty {
 
+    /** Singleton instance. */
     public static final Empty INSTANCE = new Empty();
 
     private Empty() {}

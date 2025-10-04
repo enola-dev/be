@@ -22,6 +22,12 @@ public abstract class Task<I, O> {
         this.input = requireNonNull(input);
     }
 
+    /**
+     * The main logic of the task.
+     *
+     * @return output, never null (use {@link Empty#INSTANCE}; or {@link Optional}, if needed)
+     * @throws Exception in case of any failure
+     */
     protected abstract O execute() throws Exception;
 
     // package-private, for TaskExecutor (only)
