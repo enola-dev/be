@@ -30,7 +30,7 @@ public class FailingTask extends Task<Void, String> {
             case ERROR -> throw new Error("Intentional error");
                 // case OTHER_THROWABLE ->
                 //    throw new Throwable("Intentional throwable");
+            default -> throw new IllegalStateException("Unknown failure mode: " + failureMode);
         }
-        return null; // Unreachable --- IGNORE ---
     }
 }
