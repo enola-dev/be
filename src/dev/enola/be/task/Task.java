@@ -72,4 +72,16 @@ public abstract class Task<I, O> {
     }
 
     // TODO Set<Task<?, ?, ?>> dependencies();
+
+    @Override
+    public String toString() {
+        return "type: Task # "
+                + getClass().getSimpleName()
+                + "\nid: "
+                + id()
+                + "\ninput: "
+                + input()
+                + "\nstatus: "
+                + status();
+    }
 }
