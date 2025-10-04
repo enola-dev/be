@@ -43,11 +43,15 @@ public class TaskExecutor implements AutoCloseable {
 
         Future<O> future;
         var timeout = task.timeout();
-        if (timeout.isZero()) {
+        if (timeout.isZero() || timeout.isNegative()) {
             future = executor.submit(task::execute);
         } else {
             Collection<? extends Callable<O>> callables = List.of(task::execute);
             try {
+                // Nota bene: The risk of toMillis() throwing an ArithmeticException is
+                // unrealistically low, as that would require a timeout of more than ~292 million
+                // years... :-) But if that ever happens, we want to know about it, hence no
+                // try/catch here.
                 var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
                 future = futures.iterator().next();
             } catch (InterruptedException e) {
