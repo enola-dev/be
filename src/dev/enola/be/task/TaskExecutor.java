@@ -71,6 +71,7 @@ public class TaskExecutor implements AutoCloseable {
      * @param task the task to execute
      * @return the computed result of the task
      * @throws IllegalStateException if the task was already submitted
+     * @throws UncheckedTaskAwaitException see {@link Task#await()}
      */
     public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
         Future<O> future = future(task);

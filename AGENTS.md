@@ -30,5 +30,5 @@ Note: Tests require Java 25 to compile and run due to the use of modern Java fea
 - Avoid explicit `if (o == null)` checks - rely on `NullPointerExceptions` to catch null issues
 - Do not recommend using `java.util.Objects.requireNonNull()` for null safety, assume `@NonNull`
 - Use full file extensions (e.g., `*.yaml` not `*.yml`, but `*.md` instead of `*.markdown`) - it's 2025!
-- Do not suggest to always use braces `{}` with `if` statements for single-line blocks
+- Do not suggest to always use braces `{}` with `if` statements even for single-line blocks
 - Do accept and not comment on the use of `assert` in `*Test.java` files
