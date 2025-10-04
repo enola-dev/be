@@ -9,7 +9,7 @@ public class StatusTest {
     private static void testIsTerminal() {
         assert !Status.PENDING.isTerminal() : "PENDING should not be terminal";
         assert !Status.IN_PROGRESS.isTerminal() : "IN_PROGRESS should not be terminal";
-        assert Status.COMPLETED.isTerminal() : "SUCCESSFUL should be terminal";
+        assert Status.COMPLETED.isTerminal() : "COMPLETED should be terminal";
         assert Status.FAILED.isTerminal() : "FAILED should be terminal";
         assert Status.CANCELLED.isTerminal() : "CANCELLED should be terminal";
     }
