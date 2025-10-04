@@ -3,6 +3,7 @@ package dev.enola.be.task;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -13,6 +14,7 @@ public abstract class Task<I, O> {
 
     private final UUID id = UUID.randomUUID();
     private final AtomicReference<Future<O>> future = new AtomicReference<>();
+    private /*TODO @Nullable*/ Instant startedAt;
     protected final I input;
 
     protected Task(I input) {
@@ -25,6 +27,7 @@ public abstract class Task<I, O> {
     final void future(Future<O> future) {
         if (!this.future.compareAndSet(null, future))
             throw new IllegalStateException("Future already set for task " + id());
+        this.startedAt = Instant.now();
     }
 
     /** 🆔 */
@@ -57,7 +60,9 @@ public abstract class Task<I, O> {
         };
     }
 
-    // TODO Optional<Instant> startedAt();
+    public final Optional<Instant> startedAt() {
+        return Optional.ofNullable(startedAt);
+    }
 
     // TODO Optional<Instant> endedAt();
 
@@ -87,6 +92,8 @@ public abstract class Task<I, O> {
         sb.append(id().toString());
         sb.append("\nstatus: ");
         sb.append(status().toString());
+
+        startedAt().ifPresent(s -> sb.append("\nstartedAt: ").append(s.toString()));
 
         if (timeout() != Duration.ZERO) {
             sb.append("\ntimeout: ");
