@@ -1,6 +1,7 @@
 package dev.enola.be.task.demo;
 
 import dev.enola.be.task.Task;
+import dev.enola.be.task.TaskExecutor;
 import dev.enola.be.task.demo.LongIncrementingTask.Input;
 import dev.enola.be.task.demo.LongIncrementingTask.Output;
 
@@ -44,7 +45,7 @@ public class LongIncrementingTask extends Task<Input, Output> {
         // Count to 10000, with 1ms pause between each increment
         var input = new Input(10000, Duration.ofMillis(1));
         var task = new LongIncrementingTask(input, System.out::println);
-        try (var executor = new dev.enola.be.task.TaskExecutor()) {
+        try (var executor = new TaskExecutor()) {
             executor.await(task);
             System.out.println(task);
         }
