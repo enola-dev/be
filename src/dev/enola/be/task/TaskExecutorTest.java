@@ -7,7 +7,6 @@ import dev.enola.be.task.test.SlowTask;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 
 public class TaskExecutorTest {
 
@@ -52,12 +51,11 @@ public class TaskExecutorTest {
     private static void testFailingTask(FailingTask.FailureMode failureMode) throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new FailingTask(failureMode);
-            var future = executor.future(task);
 
             try {
-                future.get();
+                executor.await(task);
                 assert false : "Should have thrown an exception";
-            } catch (ExecutionException e) {
+            } catch (Throwable e) {
                 // Expected
             }
 

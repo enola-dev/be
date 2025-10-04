@@ -37,8 +37,6 @@ public class LongIncrementingTask extends Task<Input, Output> {
 
         // TODO Report % progress
 
-        // TODO Stream counting
-
         return new Output(input.max);
     }
 
