@@ -195,7 +195,7 @@ public class TaskExecutorTest {
             var task =
                     new Task<Void, String>(null) {
                         @Override
-                        protected String execute() throws Exception {
+                        protected String execute() {
                             return Thread.currentThread().getName();
                         }
                     };
