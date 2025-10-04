@@ -82,6 +82,11 @@ public abstract class Task<I, O> {
         sb.append("\nstatus: ");
         sb.append(status().toString());
 
+        if (timeout() != Duration.ZERO) {
+            sb.append("\ntimeout: ");
+            sb.append(timeout().toString());
+        }
+
         var input = input();
         if (input != Empty.INSTANCE) {
             sb.append("\ninput: ");
@@ -90,6 +95,8 @@ public abstract class Task<I, O> {
 
         output().ifPresent(o -> sb.append("\noutput: ").append(o.toString())); // TODO Use Jackson?
         failure().ifPresent(t -> sb.append("\nfailure: ").append(t.toString()));
+
+        sb.append("\n");
     }
 
     @Override
