@@ -84,21 +84,24 @@ public abstract class Task<I, O> {
 
     // TODO Set<Task<?, ?, ?>> dependencies();
 
-    @Override
-    public String toString() {
-        var sb = new StringBuilder();
+    public void toString(StringBuilder sb) {
         sb.append("type: Task # ");
         sb.append(getClass().getSimpleName());
         sb.append("\nid: ");
-        sb.append(id());
+        sb.append(id().toString());
         sb.append("\ninput: ");
-        sb.append(input());
+        sb.append(input().toString()); // TODO Use Jackson?
         sb.append("\nstatus: ");
-        sb.append(status());
+        sb.append(status().toString());
 
-        output().ifPresent(o -> sb.append("\noutput: ").append(o));
-        failure().ifPresent(t -> sb.append("\nfailure: ").append(t));
+        output().ifPresent(o -> sb.append("\noutput: ").append(o.toString())); // TODO Use Jackson?
+        failure().ifPresent(t -> sb.append("\nfailure: ").append(t.toString()));
+    }
 
+    @Override
+    public String toString() {
+        var sb = new StringBuilder();
+        toString(sb);
         return sb.toString();
     }
 }
