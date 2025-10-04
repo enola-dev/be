@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -28,8 +26,7 @@ public class TaskExecutor implements AutoCloseable {
 
     private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
 
-    // TODO private? Or @VisibleForTesting // Intentionally only package-private, for now
-    <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
+    private <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
 
@@ -68,51 +65,28 @@ public class TaskExecutor implements AutoCloseable {
     /**
      * Submits a task for execution and waits for it to complete, returning its result.
      *
-     * <p>This is a convenience method that combines submitting a task via {@link #future(Task)} and
-     * then waiting for its completion via {@link java.util.concurrent.Future#get()}.
-     *
-     * <p>Note that any checked exceptions thrown by the task's {@link Task#execute()} method will
-     * be wrapped in an {@link UncheckedTaskAwaitException}. {@link RuntimeException} and {@link
-     * Error} will be re-thrown as-is.
+     * <p>This is a convenience method that basically combines submitting a task via {@link
+     * #async(Task)} and then waiting for it to complete via {@link Task#await()}. (It's internally
+     * implemented almost like that, but not quite; it uses a [small] short-cut for optimization.)
      *
      * @param task the task to execute
-     * @param <O> the type of the task's output
-     * @return the computed result
      * @throws IllegalStateException if the task was already submitted
-     * @throws UncheckedTaskAwaitException if the task was cancelled, interrupted, or failed with an
-     *     checked exception (wrapped cause). The cause can be inspected to determine the root
-     *     cause. If the task fails with a {@link RuntimeException} or {@link Error}, it will be
-     *     re-thrown as-is and not wrapped.
      */
     public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
         Future<O> future = future(task);
-        try {
-            return future.get();
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new UncheckedTaskAwaitException("Task interrupted execution", e);
-
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-                throw new UncheckedTaskAwaitException("Task execution interrupted", cause);
-            }
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            }
-            if (cause instanceof Error) {
-                throw (Error) cause;
-            }
-            throw new UncheckedTaskAwaitException(
-                    "Task execution failed: " + cause.getMessage(), cause);
-
-        } catch (CancellationException e) {
-            throw new UncheckedTaskAwaitException("Task cancelled", e);
-        }
+        return task.await(future);
     }
 
+    /**
+     * Submits a task for asynchronous execution.
+     *
+     * <p>The task's {@link Task#execute()} method will be called in a virtual thread. You can later
+     * await its completion and get its result with {@link Task#await()} (blocking), or you could
+     * use {@link Task#status()}, {@link Task#output()} and {@link Task#failure()} to occasionally
+     * inspect the result without blocking.
+     *
+     * @param task the task to execute
+     */
     public void async(Task<?, ?> task) {
         future(task);
     }

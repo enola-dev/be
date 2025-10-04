@@ -93,20 +93,19 @@ public class TaskExecutorTest {
     private static void testCancelTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000);
-            var future = executor.future(task);
+            executor.async(task);
 
             task.cancel();
 
             try {
-                future.get();
+                task.await();
                 assert false : "Should have thrown CancellationException";
-            } catch (CancellationException e) {
+            } catch (UncheckedTaskAwaitException e) {
                 // Expected
             }
 
             assert task.status() == Status.CANCELLED
                     : "Status should be CANCELLED after cancel(), but is " + task.status();
-            assert future.isCancelled() : "Future should be cancelled";
         }
     }
 
@@ -156,13 +155,13 @@ public class TaskExecutorTest {
             assert task.status() == Status.PENDING : "Status should be PENDING: " + task.status();
             assert task.toString().contains("status: PENDING") : "toString !PENDING";
 
-            var future = executor.future(task);
+            executor.async(task);
 
             var status = task.status();
             assert status == Status.IN_PROGRESS : "Status should be IN_PROGRESS, got " + status;
             assert task.toString().contains("status: IN_PROGRESS") : "toString !IN_PROGRESS";
 
-            future.get();
+            task.await();
 
             assert task.status() == Status.COMPLETED : "Final status should be COMPLETED";
             assert task.toString().contains("status: COMPLETED") : "toString !COMPLETED";
