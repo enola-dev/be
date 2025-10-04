@@ -192,7 +192,12 @@ public abstract class Task<I, O> {
             sb.append(input.toString()); // TODO Use Jackson?
         }
 
-        output().ifPresent(o -> sb.append("\noutput: ").append(o.toString())); // TODO Use Jackson?
+        output().ifPresent(
+                        o -> {
+                            if (o != Empty.INSTANCE)
+                                // TODO Use Jackson?
+                                sb.append("\noutput: ").append(o.toString());
+                        });
         failure().ifPresent(t -> sb.append("\nfailure: ").append(t.toString()));
 
         sb.append("\n");

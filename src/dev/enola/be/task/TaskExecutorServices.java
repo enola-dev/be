@@ -44,6 +44,7 @@ final class TaskExecutorServices {
     private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
 
     static void close(ExecutorService executor) {
+        // TODO Log shutdown progress & total time...
         executor.shutdown();
         try {
             // Wait for existing tasks to terminate
