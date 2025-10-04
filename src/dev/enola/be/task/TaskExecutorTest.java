@@ -128,7 +128,7 @@ public class TaskExecutorTest {
 
             var status = task.status();
             assert status == Status.IN_PROGRESS || status == Status.COMPLETED
-                    : "Status should be IN_PROGRESS or SUCCESSFUL, got " + status;
+                    : "Status should be IN_PROGRESS or COMPLETED, got " + status;
 
             future.get();
 
