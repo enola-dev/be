@@ -114,7 +114,7 @@ public abstract class Task<I, O> {
         sb.append("\nduration: ");
         sb.append(duration().toString());
 
-        if (timeout() != Duration.ZERO) {
+        if (!timeout().isZero()) {
             sb.append("\ntimeout: ");
             sb.append(timeout().toString());
         }
