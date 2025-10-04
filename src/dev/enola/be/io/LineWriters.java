@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public final class LineWriters {
 
+    public static final LineWriter NOOP = _ -> {};
     public static final LineWriter SYSTEM_OUT = from(System.out);
     public static final LineWriter SYSTEM_ERR = from(System.err);
 

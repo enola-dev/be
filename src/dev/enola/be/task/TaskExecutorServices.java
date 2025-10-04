@@ -2,6 +2,7 @@ package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -44,7 +45,13 @@ final class TaskExecutorServices {
     private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
 
     static void close(ExecutorService executor) {
-        // TODO Log shutdown progress & total time...
+        var start = System.currentTimeMillis();
+        logger.fine(() -> "Starting to shut down ExecutorService " + executor);
+
+        // TODO Signal close() to all running tasks, so they can terminate gracefully & fast
+
+        // TODO Then (only) use Java 19+ executor.close()
+
         executor.shutdown();
         try {
             // Wait for existing tasks to terminate
@@ -61,6 +68,10 @@ final class TaskExecutorServices {
             // Preserve interrupt status
             Thread.currentThread().interrupt();
         }
+
+        var end = System.currentTimeMillis();
+        var duration = Duration.ofMillis(end - start);
+        logger.info(() -> "Finished shutting down ExecutorService " + executor + " in " + duration);
     }
 
     private TaskExecutorServices() {}

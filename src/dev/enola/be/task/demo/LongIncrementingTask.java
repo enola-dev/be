@@ -7,6 +7,7 @@ import dev.enola.be.task.TaskExecutor;
 import dev.enola.be.task.demo.LongIncrementingTask.Input;
 import dev.enola.be.task.demo.LongIncrementingTask.Output;
 import dev.enola.common.function.CheckedConsumer;
+import dev.enola.common.log.JulConfigurer;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -54,19 +55,21 @@ public class LongIncrementingTask extends Task<Input, Output> {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        JulConfigurer.configureRootLogger();
+
         // Count to max, with 1ms pause between each increment
         var max = 10000;
         var sleep = Duration.ofMillis(0);
 
         var input = new Input(max, sleep);
-        var pumper = new NonBlockingLineWriter(7, LineWriters.SYSTEM_OUT);
+        var pumper = new NonBlockingLineWriter(10000, LineWriters.SYSTEM_OUT);
         var task = new LongIncrementingTask(input, pumper::println);
         try (var executor = new TaskExecutor()) {
             executor.async(pumper);
+            executor.async(new LongIncrementingTask(input, LineWriters.NOOP::println));
             executor.await(task);
-            System.out.println(task);
-        }
 
-        simpleLoop(max, sleep);
+            simpleLoop(max, sleep);
+        }
     }
 }
