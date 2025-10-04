@@ -17,7 +17,10 @@ class TaskCallable<T> implements Callable<T> {
         var originalThreadName = thread.getName();
         thread.setName(task.id().toString());
         try {
-            return task.execute();
+            var output = task.execute();
+            if (output == null)
+                throw new NullPointerException("Task " + task.id() + " returned null output");
+            return output;
         } finally {
             thread.setName(originalThreadName);
             task.endedAt(Instant.now());

@@ -20,7 +20,7 @@ public class TaskExecutor implements AutoCloseable {
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
 
-    // TODO Eviction policy of completed tasks?!
+    // TODO Eviction policy of completed tasks?! As-is, this leaks memory...
     // E.g. periodically scan the map and remove tasks that are in a terminal state.
     // Persist them first, so that get() can still find them later; with separate
     // eviction policy.
