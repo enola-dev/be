@@ -3,7 +3,6 @@ package dev.enola.be.task.test;
 import dev.enola.be.task.Task;
 
 import java.time.Duration;
-import java.util.concurrent.CancellationException;
 
 public class SlowTask extends Task<String, String> {
 
@@ -33,7 +32,7 @@ public class SlowTask extends Task<String, String> {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CancellationException();
+            throw e;
         }
     }
 }
