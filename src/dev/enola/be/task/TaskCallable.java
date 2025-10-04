@@ -1,5 +1,6 @@
 package dev.enola.be.task;
 
+import java.time.Instant;
 import java.util.concurrent.Callable;
 
 class TaskCallable<T> implements Callable<T> {
@@ -19,6 +20,7 @@ class TaskCallable<T> implements Callable<T> {
             return task.execute();
         } finally {
             thread.setName(originalThreadName);
+            task.endedAt(Instant.now());
         }
     }
 }
