@@ -3,6 +3,7 @@ package dev.enola.be.task.test;
 import dev.enola.be.task.Task;
 
 import java.time.Duration;
+import java.util.concurrent.CancellationException;
 
 public class SlowTask extends Task<String, String> {
 
@@ -26,13 +27,13 @@ public class SlowTask extends Task<String, String> {
 
     @Override
     protected String execute() throws Exception {
-        // try {
-        Thread.sleep(sleepMillis);
-        return "Completed: " + input;
+        try {
+            Thread.sleep(sleepMillis);
+            return "Completed: " + input;
 
-        // } catch (InterruptedException e) {
-        //    Thread.currentThread().interrupt();
-        //    throw new CancellationException();
-        // }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CancellationException();
+        }
     }
 }
