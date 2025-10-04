@@ -11,7 +11,7 @@ public class NonBlockingLineWriter extends TaskWithoutInputOutput implements Lin
 
     private final LineWriter delegate;
     private final BlockingQueue<Object> queue;
-    private boolean overflow;
+    private volatile boolean overflow;
 
     public NonBlockingLineWriter(int queueCapacity, LineWriter delegate) {
         this.delegate = delegate;
