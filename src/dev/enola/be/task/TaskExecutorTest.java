@@ -53,7 +53,7 @@ public class TaskExecutorTest {
     private static void testTimingOutTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000, Duration.ofMillis(1));
-            executor.submit(task);
+            executor.future(task);
             Thread.sleep(100);
             assert task.status() == Status.CANCELLED
                     : "Status should now be CANCELLED, but is " + task.status();
