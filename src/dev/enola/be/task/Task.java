@@ -1,5 +1,7 @@
 package dev.enola.be.task;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +28,7 @@ public abstract class Task<I, O> {
     protected final I input;
 
     protected Task(I input) {
-        this.input = input;
+        this.input = requireNonNull(input);
     }
 
     protected abstract O execute() throws Exception;

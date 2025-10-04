@@ -1,8 +1,9 @@
 package dev.enola.be.task.test;
 
+import dev.enola.be.task.Empty;
 import dev.enola.be.task.Task;
 
-public class FailingTask extends Task<Void, String> {
+public class FailingTask extends Task<Empty, String> {
 
     public enum FailureMode {
         RUNTIME_EXCEPTION,
@@ -13,7 +14,7 @@ public class FailingTask extends Task<Void, String> {
     private final FailureMode failureMode;
 
     public FailingTask(FailureMode failureMode) {
-        super(null);
+        super(Empty.INSTANCE);
         this.failureMode = failureMode;
     }
 

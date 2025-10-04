@@ -210,7 +210,7 @@ public class TaskExecutorTest {
     private static void testThreadNaming() {
         try (var executor = new TaskExecutor()) {
             var task =
-                    new Task<Void, String>(null) {
+                    new Task<Empty, String>(Empty.INSTANCE) {
                         @Override
                         protected String execute() {
                             return Thread.currentThread().getName();
