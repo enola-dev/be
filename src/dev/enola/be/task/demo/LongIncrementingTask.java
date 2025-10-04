@@ -1,13 +1,16 @@
 package dev.enola.be.task.demo;
 
+import dev.enola.be.io.LineWriters;
+import dev.enola.be.io.NonBlockingLineWriter;
 import dev.enola.be.task.Task;
 import dev.enola.be.task.TaskExecutor;
 import dev.enola.be.task.demo.LongIncrementingTask.Input;
 import dev.enola.be.task.demo.LongIncrementingTask.Output;
+import dev.enola.common.function.CheckedConsumer;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Consumer;
 
 public class LongIncrementingTask extends Task<Input, Output> {
 
@@ -15,9 +18,9 @@ public class LongIncrementingTask extends Task<Input, Output> {
 
     record Output(long result) {}
 
-    private final Consumer<Long> progressConsumer;
+    private final CheckedConsumer<Long, IOException> progressConsumer;
 
-    public LongIncrementingTask(Input input, Consumer<Long> progressConsumer) {
+    public LongIncrementingTask(Input input, CheckedConsumer<Long, IOException> progressConsumer) {
         super(input);
         this.progressConsumer = progressConsumer;
     }
@@ -56,8 +59,10 @@ public class LongIncrementingTask extends Task<Input, Output> {
         var sleep = Duration.ofMillis(0);
 
         var input = new Input(max, sleep);
-        var task = new LongIncrementingTask(input, System.out::println);
+        var pumper = new NonBlockingLineWriter(7, LineWriters.SYSTEM_OUT);
+        var task = new LongIncrementingTask(input, pumper::println);
         try (var executor = new TaskExecutor()) {
+            executor.async(pumper);
             executor.await(task);
             System.out.println(task);
         }
