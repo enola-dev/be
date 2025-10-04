@@ -1,8 +1,14 @@
 package dev.enola.be.task;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,8 +16,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class TaskExecutor implements AutoCloseable {
-
-    // TODO Support submit with timeout.. but here, or in Task?
 
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
@@ -34,7 +38,20 @@ public class TaskExecutor implements AutoCloseable {
         if (task.status() != Status.PENDING)
             throw new IllegalStateException("Task " + task.id() + " not PENDING: " + task.status());
 
-        Future<O> future = executor.submit(task::execute);
+        Future<O> future;
+        var timeout = task.timeout();
+        if (timeout.isZero()) {
+            future = executor.submit(task::execute);
+        } else {
+            Collection<? extends Callable<O>> callables = List.of(task::execute);
+            try {
+                var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
+                future = futures.iterator().next();
+            } catch (InterruptedException e) {
+                future = CompletableFuture.failedFuture(e);
+                Thread.currentThread().interrupt();
+            }
+        }
         task.future.set(future);
         return future;
     }
