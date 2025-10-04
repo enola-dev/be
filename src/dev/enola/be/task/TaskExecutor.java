@@ -43,19 +43,7 @@ public class TaskExecutor implements AutoCloseable {
 
             Future<O> future;
             var timeout = task.timeout();
-
-            Callable<O> callable =
-                    () -> {
-                        var thread = Thread.currentThread();
-                        var originalThreadName = thread.getName();
-                        thread.setName(task.id().toString());
-                        try {
-                            return task.execute();
-                        } finally {
-                            thread.setName(originalThreadName);
-                        }
-                    };
-
+            Callable<O> callable = new TaskCallable<>(task);
             if (timeout.isZero() || timeout.isNegative()) {
                 future = executor.submit(callable);
             } else {
