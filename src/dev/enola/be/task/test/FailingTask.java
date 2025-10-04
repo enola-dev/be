@@ -8,7 +8,6 @@ public class FailingTask extends Task<Void, String> {
         RUNTIME_EXCEPTION,
         CHECKED_EXCEPTION,
         ERROR,
-        // OTHER_THROWABLE
     }
 
     private final FailureMode failureMode;
@@ -28,8 +27,6 @@ public class FailingTask extends Task<Void, String> {
             case RUNTIME_EXCEPTION -> throw new RuntimeException("Intentional runtime exception");
             case CHECKED_EXCEPTION -> throw new Exception("Intentional checked exception");
             case ERROR -> throw new Error("Intentional error");
-                // case OTHER_THROWABLE ->
-                //    throw new Throwable("Intentional throwable");
             default -> throw new IllegalStateException("Unknown failure mode: " + failureMode);
         }
     }
