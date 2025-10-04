@@ -1,5 +1,7 @@
 package dev.enola.be.task;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -37,6 +39,27 @@ final class TaskExecutorServices {
     static ExecutorService newVirtualThreadPerTaskExecutor() {
         ThreadFactory factory = Thread.ofVirtual().uncaughtExceptionHandler(HANDLER).factory();
         return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
+
+    static void close(ExecutorService executor) {
+        executor.shutdown();
+        try {
+            // Wait for existing tasks to terminate
+            if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, SECONDS)) {
+
+                // Cancel currently executing tasks
+                executor.shutdownNow();
+            }
+
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            executor.shutdownNow();
+
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 
     private TaskExecutorServices() {}
