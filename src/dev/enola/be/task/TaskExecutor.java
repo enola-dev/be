@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TaskExecutor implements AutoCloseable {
 
+    // TODO Support submit with timeout.. but here, or in Task?
+
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
 
@@ -27,6 +29,11 @@ public class TaskExecutor implements AutoCloseable {
     <O> Future<O> future(Task<?, O> task) {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
+
+        // This serves to detect if it was already submitted to ANOTHER TaskExecutor
+        if (task.status() != Status.PENDING)
+            throw new IllegalStateException("Task " + task.id() + " not PENDING: " + task.status());
+
         Future<O> future = executor.submit(task::execute);
         task.future.set(future);
         return future;

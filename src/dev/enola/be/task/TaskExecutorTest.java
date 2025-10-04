@@ -9,23 +9,42 @@ import java.util.UUID;
 public class TaskExecutorTest {
 
     public static void main(String[] args) throws Exception {
-        testSubmitTask();
+        testCompletedTask();
         testGetTask();
         testGetNonExistentTask();
         testListTasks();
         testTaskStatusProgression();
         testFailingTask();
         testCancelTask();
-        testResubmitTask();
+        testResubmitTaskFailure();
+        testSubmitTaskToAnotherExecutorFailure();
         testExecutorClose();
     }
 
-    private static void testSubmitTask() throws Exception {
+    private static void testCompletedTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
             var future = executor.future(task);
             var result = future.get();
             assert "Result: test".equals(result) : "Result should match expected output";
+        }
+    }
+
+    private static void testFailingTask() throws Exception {
+        try (var executor = new TaskExecutor()) {
+            var task = new FailingTask("test");
+            var future = executor.future(task);
+
+            try {
+                future.get();
+                assert false : "Should have thrown an exception";
+            } catch (Exception e) {
+                // Expected
+            }
+
+            Thread.sleep(100);
+
+            assert task.status() == Status.FAILED : "Status should be FAILED after exception";
         }
     }
 
@@ -79,30 +98,12 @@ public class TaskExecutorTest {
             Thread.sleep(100);
 
             var status = task.status();
-            assert status == Status.IN_PROGRESS || status == Status.SUCCESSFUL
+            assert status == Status.IN_PROGRESS || status == Status.COMPLETED
                     : "Status should be IN_PROGRESS or SUCCESSFUL, got " + status;
 
             future.get();
 
-            assert task.status() == Status.SUCCESSFUL : "Final status should be SUCCESSFUL";
-        }
-    }
-
-    private static void testFailingTask() throws Exception {
-        try (var executor = new TaskExecutor()) {
-            var task = new FailingTask("test");
-            var future = executor.future(task);
-
-            try {
-                future.get();
-                assert false : "Should have thrown an exception";
-            } catch (Exception e) {
-                // Expected
-            }
-
-            Thread.sleep(100);
-
-            assert task.status() == Status.FAILED : "Status should be FAILED after exception";
+            assert task.status() == Status.COMPLETED : "Final status should be SUCCESSFUL";
         }
     }
 
@@ -122,7 +123,7 @@ public class TaskExecutorTest {
         }
     }
 
-    private static void testResubmitTask() throws Exception {
+    private static void testResubmitTaskFailure() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
             executor.future(task);
@@ -133,6 +134,22 @@ public class TaskExecutorTest {
             } catch (IllegalStateException e) {
                 assert e.getMessage().contains("already submitted")
                         : "Error message should mention 'already submitted'";
+            }
+        }
+    }
+
+    private static void testSubmitTaskToAnotherExecutorFailure() throws Exception {
+        var task = new ImmediateTask("test");
+        try (var executor1 = new TaskExecutor()) {
+            executor1.future(task);
+        }
+        try (var executor2 = new TaskExecutor()) {
+            try {
+                executor2.future(task);
+                assert false : "Should have thrown IllegalStateException on resubmit";
+            } catch (IllegalStateException e) {
+                assert e.getMessage().contains("not PENDING")
+                        : "Error message should mention 'not PENDING:'";
             }
         }
     }
