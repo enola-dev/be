@@ -122,6 +122,11 @@ public class TaskExecutor implements AutoCloseable {
 
     @Override
     public void close() {
+        // Signal to all running tasks, so they can terminate gracefully & fast
+        for (Task<?, ?> task : tasks.values()) {
+            task.cancel();
+        }
+
         TaskExecutorServices.close(executor);
         TaskExecutorServices.close(timeoutScheduler);
     }
