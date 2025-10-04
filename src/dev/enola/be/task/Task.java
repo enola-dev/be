@@ -70,11 +70,11 @@ public abstract class Task<I, O> {
      *     TaskExecutor#async(Task)}
      */
     public O await() throws IllegalStateException, UncheckedTaskAwaitException {
-        if (status() == Status.PENDING)
+        var future = this.future.get();
+        if (future == null) {
             throw new IllegalStateException(
                     "Task not yet submitted to TaskExecutor.async: " + id());
-        var future = this.future.get();
-        if (future == null) throw new IllegalStateException("Task not yet submitted: " + id());
+        }
         return await(future);
     }
 
