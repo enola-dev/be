@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,6 +46,67 @@ public abstract class Task<I, O> {
 
     public final I input() {
         return input;
+    }
+
+    /**
+     * Awaits the completion of the task (as in {@link Status#COMPLETED}, and returns its output.
+     *
+     * <p>This method can only be called after the task has been submitted to {@link
+     * TaskExecutor#async(Task)}. If you need the result immediately after submission anyway,
+     * consider just directly using {@link TaskExecutor#await(Task)} instead. (This method however
+     * is typically used if you want to first submit a task, do something else, and then later await
+     * its result.)
+     *
+     * <p>Note that any checked exceptions thrown by the task's {@link Task#execute()} method will
+     * be wrapped in an {@link UncheckedTaskAwaitException}. {@link RuntimeException} and {@link
+     * Error} will be re-thrown as-is.
+     *
+     * @param task the task to execute
+     * @param <O> the type of the task's output
+     * @return the computed result
+     * @throws UncheckedTaskAwaitException if the task was cancelled, interrupted, or failed with an
+     *     checked exception (wrapped cause). The cause can be inspected to determine the root
+     *     cause. If the task fails with a {@link RuntimeException} or {@link Error}, it will be
+     *     re-thrown as-is and not wrapped.
+     * @throws IllegalStateException if the task was not yet submitted with {@link
+     *     TaskExecutor#async(Task)}
+     */
+    public O await() throws IllegalStateException, UncheckedTaskAwaitException {
+        if (status() == Status.PENDING)
+            throw new IllegalStateException(
+                    "Task not yet submitted to TaskExecutor.async: " + id());
+        var future = this.future.get();
+        if (future == null) throw new IllegalStateException("Task not yet submitted: " + id());
+        return await(future);
+    }
+
+    // package-private, for TaskExecutor (only)
+    O await(Future<O> future) throws UncheckedTaskAwaitException {
+        try {
+            return future.get();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new UncheckedTaskAwaitException("Task interrupted execution", e);
+
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                throw new UncheckedTaskAwaitException("Task execution interrupted", cause);
+            }
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new UncheckedTaskAwaitException(
+                    "Task execution failed: " + cause.getMessage(), cause);
+
+        } catch (CancellationException e) {
+            throw new UncheckedTaskAwaitException("Task cancelled", e);
+        }
     }
 
     public final Optional<O> output() {
