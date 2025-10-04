@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "redhat.java",
+    "josevseb.google-java-format-for-vs-code",
+    "editorconfig.editorconfig",
+    "davidanson.vscode-markdownlint",
+    "timonwong.shellcheck",
+    "redhat.vscode-yaml",
+    "gruntfuggly.todo-tree"
+  ],
+  "unwantedRecommendations": [
+    // https://github.com/kshetline/ligatures-limited/issues/39
+    "kshetline.ligatures-limited",
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-gradle",
+    "vscjava.vscode-maven"
+  ]
+}
