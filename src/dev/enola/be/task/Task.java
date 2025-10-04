@@ -3,9 +3,19 @@ package dev.enola.be.task;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 // TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
+
+    public static <I, O> Task<I, O> create(I input, Function<I, O> function) {
+        return new Task<>(input) {
+            @Override
+            protected O execute() throws Exception {
+                return function.apply(input);
+            }
+        };
+    }
 
     private final UUID id = UUID.randomUUID();
     final AtomicReference<Future<O>> future = new AtomicReference<>();
