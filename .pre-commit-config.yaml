@@ -28,7 +28,8 @@ repos:
   rev: v2.14.0
   hooks:
   - id: pretty-format-java
-    args: [--autofix, --aosp, --google-java-formatter-version=1.28.0]
+        # Keep this version in sync with the same version in .vscode/settings.json
+    args: [--autofix, --aosp, --google-java-formatter-version=1.29.0]
 
   - id: pretty-format-yaml
     args: [--autofix]

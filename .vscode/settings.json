@@ -1,0 +1,16 @@
+{
+  "[java]": {
+    "editor.tabSize": 4,
+    // Format Java using https://github.com/google/google-java-format,
+    // via https://github.com/JoseVSeb/google-java-format-for-vs-code
+    "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.addMissingImports": "never"
+    }
+  },
+  "java.format.settings.google.extra": "--aosp", // For 4 instead of 2 spaces!
+  // Keep this version in sync with the same version in .pre-commit-config.yaml
+  // NB: Changes to this are only taken into account on start-up, so need to restart.
+  "java.format.settings.google.version": "1.29.0"
+}
