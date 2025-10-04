@@ -126,12 +126,9 @@ public class TaskExecutor implements AutoCloseable {
         }
     }
 
-    // public void submit(Task<?, ?> task) { future(task); }
-    //   TODO A trivial ^^^ implementation would lose exceptions: Calling future(task) submits the
-    //        task, but does not expose the Future to the caller, so any exceptions thrown during
-    //        execution are not observable.
-    //        To preserve exceptions, consider returning the Future from submit(), or providing a
-    //        callback for error handling.
+    public void async(Task<?, ?> task) {
+        future(task);
+    }
 
     public Task<?, ?> get(UUID id) throws IllegalArgumentException {
         var task = tasks.get(id);

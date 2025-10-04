@@ -29,8 +29,7 @@ public class TaskExecutorTest {
     private static void testCompletedTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
-            var future = executor.future(task);
-            var result = future.get();
+            var result = executor.await(task);
             var output = task.output().get();
             assert result == output : "The result and output objects must be the same";
             assert "Result: test".equals(result) : "Result should match expected output";
@@ -117,7 +116,7 @@ public class TaskExecutorTest {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
             var taskId = task.id();
-            executor.future(task);
+            executor.async(task);
 
             var retrieved = executor.get(taskId);
             assert retrieved.id().equals(taskId) : "Retrieved task ID should match";
@@ -142,8 +141,8 @@ public class TaskExecutorTest {
             var task1 = new ImmediateTask("test1");
             var task2 = new ImmediateTask("test2");
 
-            executor.future(task1);
-            executor.future(task2);
+            executor.async(task1);
+            executor.async(task2);
 
             var taskIds = executor.list();
             assert taskIds.size() == 2 : "Should have 2 tasks, got " + taskIds.size();
@@ -175,10 +174,10 @@ public class TaskExecutorTest {
     private static void testResubmitTaskFailure() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
-            executor.future(task);
+            executor.async(task);
 
             try {
-                executor.future(task);
+                executor.async(task);
                 assert false : "Should have thrown IllegalStateException on resubmit";
             } catch (IllegalStateException e) {
                 assert e.getMessage().contains("already submitted")
@@ -190,11 +189,11 @@ public class TaskExecutorTest {
     private static void testSubmitTaskToAnotherExecutorFailure() throws Exception {
         var task = new ImmediateTask("test");
         try (var executor1 = new TaskExecutor()) {
-            executor1.future(task);
+            executor1.async(task);
         }
         try (var executor2 = new TaskExecutor()) {
             try {
-                executor2.future(task);
+                executor2.async(task);
                 assert false : "Should have thrown IllegalStateException on resubmit";
             } catch (IllegalStateException e) {
                 assert e.getMessage().contains("not PENDING")
@@ -206,8 +205,7 @@ public class TaskExecutorTest {
     private static void testExecutorClose() throws Exception {
         var executor = new TaskExecutor();
         var task = new ImmediateTask("test");
-        executor.future(task);
-
+        executor.async(task);
         executor.close();
     }
 
