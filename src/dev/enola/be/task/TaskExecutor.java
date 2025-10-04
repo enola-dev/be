@@ -1,7 +1,6 @@
 package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,8 +19,6 @@ public class TaskExecutor implements AutoCloseable {
 
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
-
-    private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
 
     // TODO Eviction policy of completed tasks?!
     // E.g. periodically scan the map and remove tasks that are in a terminal state.
@@ -144,21 +141,6 @@ public class TaskExecutor implements AutoCloseable {
 
     @Override
     public void close() {
-        executor.shutdown();
-        try {
-            // Wait for existing tasks to terminate
-            if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, SECONDS)) {
-
-                // Cancel currently executing tasks
-                executor.shutdownNow();
-            }
-
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            executor.shutdownNow();
-
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
+        TaskExecutorServices.close(executor);
     }
 }
