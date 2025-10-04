@@ -61,8 +61,6 @@ public abstract class Task<I, O> {
      * be wrapped in an {@link UncheckedTaskAwaitException}. {@link RuntimeException} and {@link
      * Error} will be re-thrown as-is.
      *
-     * @param task the task to execute
-     * @param <O> the type of the task's output
      * @return the computed result
      * @throws UncheckedTaskAwaitException if the task was cancelled, interrupted, or failed with an
      *     checked exception (wrapped cause). The cause can be inspected to determine the root
