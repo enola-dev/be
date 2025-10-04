@@ -4,18 +4,20 @@ import dev.enola.be.task.test.FailingTask;
 import dev.enola.be.task.test.ImmediateTask;
 import dev.enola.be.task.test.SlowTask;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public class TaskExecutorTest {
 
     public static void main(String[] args) throws Exception {
         testCompletedTask();
+        testFailingTask();
+        testTimingOutTask();
+        testCancelTask();
         testGetTask();
         testGetNonExistentTask();
         testListTasks();
         testTaskStatusProgression();
-        testFailingTask();
-        testCancelTask();
         testResubmitTaskFailure();
         testSubmitTaskToAnotherExecutorFailure();
         testExecutorClose();
@@ -45,6 +47,33 @@ public class TaskExecutorTest {
             Thread.sleep(100);
 
             assert task.status() == Status.FAILED : "Status should be FAILED after exception";
+        }
+    }
+
+    private static void testTimingOutTask() throws Exception {
+        try (var executor = new TaskExecutor()) {
+            var task = new SlowTask("test", 1000, Duration.ofMillis(1));
+            executor.submit(task);
+            Thread.sleep(100);
+            assert task.status() == Status.CANCELLED
+                    : "Status should now be CANCELLED, but is " + task.status();
+        }
+    }
+
+    private static void testCancelTask() throws Exception {
+        try (var executor = new TaskExecutor()) {
+            var task = new SlowTask("test", 1000);
+            var future = executor.future(task);
+
+            Thread.sleep(100);
+
+            task.cancel();
+
+            Thread.sleep(100);
+
+            assert task.status() == Status.CANCELLED
+                    : "Status should be CANCELLED after cancel(), but is " + task.status();
+            assert future.isCancelled() : "Future should be cancelled";
         }
     }
 
@@ -104,22 +133,6 @@ public class TaskExecutorTest {
             future.get();
 
             assert task.status() == Status.COMPLETED : "Final status should be SUCCESSFUL";
-        }
-    }
-
-    private static void testCancelTask() throws Exception {
-        try (var executor = new TaskExecutor()) {
-            var task = new SlowTask("test", 1000);
-            var future = executor.future(task);
-
-            Thread.sleep(100);
-
-            task.cancel();
-
-            Thread.sleep(100);
-
-            assert task.status() == Status.CANCELLED : "Status should be CANCELLED after cancel()";
-            assert future.isCancelled() : "Future should be cancelled";
         }
     }
 
