@@ -127,7 +127,7 @@ public class TaskExecutor implements AutoCloseable {
             task.cancel();
         }
 
-        TaskExecutorServices.close(executor);
-        TaskExecutorServices.close(timeoutScheduler);
+        executor.close();
+        timeoutScheduler.close();
     }
 }

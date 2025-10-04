@@ -9,8 +9,6 @@ import java.util.concurrent.BlockingQueue;
 
 public class NonBlockingLineWriter extends TaskWithoutInputOutput implements LineWriter {
 
-    // TODO close() method to flush remaining messages? How would TaskExecutor know when to call it?
-
     private final LineWriter delegate;
     private final BlockingQueue<Object> queue;
     private boolean overflow;

@@ -1,8 +1,5 @@
 package dev.enola.be.task;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -40,36 +37,6 @@ final class TaskExecutorServices {
     static ExecutorService newVirtualThreadPerTaskExecutor() {
         ThreadFactory factory = Thread.ofVirtual().uncaughtExceptionHandler(HANDLER).factory();
         return Executors.newThreadPerTaskExecutor(factory);
-    }
-
-    private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
-
-    static void close(ExecutorService executor) {
-        var start = System.currentTimeMillis();
-        logger.fine(() -> "Starting to shut down ExecutorService " + executor);
-
-        // TODO Then (only) use Java 19+ executor.close()
-
-        executor.shutdown();
-        try {
-            // Wait for existing tasks to terminate
-            if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, SECONDS)) {
-
-                // Cancel currently executing tasks
-                executor.shutdownNow();
-            }
-
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            executor.shutdownNow();
-
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-
-        var end = System.currentTimeMillis();
-        var duration = Duration.ofMillis(end - start);
-        logger.info(() -> "Finished shutting down ExecutorService " + executor + " in " + duration);
     }
 
     private TaskExecutorServices() {}
