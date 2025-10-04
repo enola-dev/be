@@ -74,6 +74,13 @@ public class TaskExecutorTest {
 
             task.cancel();
 
+            try {
+                future.get();
+                assert false : "Should have thrown CancellationException";
+            } catch (CancellationException e) {
+                // Expected
+            }
+
             assert task.status() == Status.CANCELLED
                     : "Status should be CANCELLED after cancel(), but is " + task.status();
             assert future.isCancelled() : "Future should be cancelled";
