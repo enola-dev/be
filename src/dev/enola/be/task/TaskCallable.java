@@ -19,7 +19,7 @@ class TaskCallable<T> implements Callable<T> {
         try {
             var output = task.execute();
             if (output == null)
-                throw new NullPointerException("Task " + task.id() + " returned null output");
+                throw new NullPointerException("Task.execute() must not return null (Task ID: " + task.id() + ")");
             return output;
         } finally {
             thread.setName(originalThreadName);
