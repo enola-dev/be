@@ -70,6 +70,7 @@ public class TaskExecutor implements AutoCloseable {
      * implemented almost like that, but not quite; it uses a [small] short-cut for optimization.)
      *
      * @param task the task to execute
+     * @return the computed result of the task
      * @throws IllegalStateException if the task was already submitted
      */
     public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
