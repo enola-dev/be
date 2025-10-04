@@ -44,8 +44,6 @@ public class TaskExecutorTest {
                 // Expected
             }
 
-            Thread.sleep(100);
-
             assert task.status() == Status.FAILED : "Status should be FAILED after exception";
         }
     }
@@ -54,7 +52,7 @@ public class TaskExecutorTest {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000, Duration.ofMillis(1));
             executor.future(task);
-            Thread.sleep(100);
+            Thread.sleep(10);
             assert task.status() == Status.CANCELLED
                     : "Status should now be CANCELLED, but is " + task.status();
         }
@@ -65,11 +63,7 @@ public class TaskExecutorTest {
             var task = new SlowTask("test", 1000);
             var future = executor.future(task);
 
-            Thread.sleep(100);
-
             task.cancel();
-
-            Thread.sleep(100);
 
             assert task.status() == Status.CANCELLED
                     : "Status should be CANCELLED after cancel(), but is " + task.status();
@@ -124,7 +118,7 @@ public class TaskExecutorTest {
 
             var future = executor.future(task);
 
-            Thread.sleep(100);
+            Thread.sleep(10);
 
             var status = task.status();
             assert status == Status.IN_PROGRESS || status == Status.COMPLETED

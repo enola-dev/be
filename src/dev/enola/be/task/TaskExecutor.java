@@ -21,6 +21,8 @@ public class TaskExecutor implements AutoCloseable {
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
 
+    private static final long CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS = 7;
+
     // TODO Eviction policy of completed tasks?!
     // E.g. periodically scan the map and remove tasks that are in a terminal state.
     // Persist them first, so that get() can still find them later; with separate
@@ -95,6 +97,7 @@ public class TaskExecutor implements AutoCloseable {
     @Override
     public void close() throws InterruptedException {
         executor.shutdown();
-        if (!executor.awaitTermination(7, TimeUnit.SECONDS)) executor.shutdownNow();
+        if (!executor.awaitTermination(CLOSE_EXECUTOR_SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS))
+            executor.shutdownNow();
     }
 }
