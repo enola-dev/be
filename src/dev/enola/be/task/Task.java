@@ -79,10 +79,10 @@ public abstract class Task<I, O> {
         sb.append(getClass().getSimpleName());
         sb.append("\nid: ");
         sb.append(id().toString());
-        sb.append("\ninput: ");
-        sb.append(input().toString()); // TODO Use Jackson?
         sb.append("\nstatus: ");
         sb.append(status().toString());
+        sb.append("\ninput: ");
+        sb.append(input().toString()); // TODO Use Jackson?
 
         output().ifPresent(o -> sb.append("\noutput: ").append(o.toString())); // TODO Use Jackson?
         failure().ifPresent(t -> sb.append("\nfailure: ").append(t.toString()));
