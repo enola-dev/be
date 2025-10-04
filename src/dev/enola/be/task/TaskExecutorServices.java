@@ -31,9 +31,11 @@ final class TaskExecutorServices {
         }
     }
 
+    private static final Thread.UncaughtExceptionHandler HANDLER =
+            new LoggingThreadUncaughtExceptionHandler();
+
     static ExecutorService newVirtualThreadPerTaskExecutor() {
-        Thread.UncaughtExceptionHandler handler = new LoggingThreadUncaughtExceptionHandler();
-        ThreadFactory factory = Thread.ofVirtual().uncaughtExceptionHandler(handler).factory();
+        ThreadFactory factory = Thread.ofVirtual().uncaughtExceptionHandler(HANDLER).factory();
         return Executors.newThreadPerTaskExecutor(factory);
     }
 
