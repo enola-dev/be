@@ -100,7 +100,7 @@ public abstract class Task<I, O> {
 
     public void toString(StringBuilder sb) {
         sb.append("type: Task # ");
-        sb.append(getClass().getSimpleName());
+        sb.append(getClass().getName());
 
         sb.append("\nid: ");
         sb.append(id().toString());
