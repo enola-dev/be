@@ -63,6 +63,23 @@ public class TaskExecutor implements AutoCloseable {
         return future;
     }
 
+    /**
+     * Submits a task for execution and waits for it to complete, returning its result.
+     *
+     * <p>This is a convenience method that combines submitting a task via {@link #future(Task)} and
+     * then waiting for its completion via {@link java.util.concurrent.Future#get()}.
+     *
+     * <p>Note that any checked exceptions thrown by the task's {@link Task#execute()} method will
+     * be wrapped in an {@link UncheckedTaskAwaitException}. {@link RuntimeException} and {@link
+     * Error} will be re-thrown as-is.
+     *
+     * @param task the task to execute
+     * @param <O> the type of the task's output
+     * @return the computed result
+     * @throws IllegalStateException if the task was already submitted
+     * @throws UncheckedTaskAwaitException if the task was cancelled, interrupted, or failed with an
+     *     exception. The cause can be inspected to determine the root cause.
+     */
     public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
         Future<O> future = future(task);
         try {
@@ -70,10 +87,14 @@ public class TaskExecutor implements AutoCloseable {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new UncheckedTaskAwaitException("Task canceled (interrupted)", e);
+            throw new UncheckedTaskAwaitException("Task canceled", e);
 
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
+            if (cause instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                throw new UncheckedTaskAwaitException("Task execution interrupted", cause);
+            }
             if (cause instanceof RuntimeException) {
                 throw (RuntimeException) cause;
             }
