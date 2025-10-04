@@ -66,8 +66,7 @@ public class TaskExecutor implements AutoCloseable {
      * Submits a task for execution and waits for it to complete, returning its result.
      *
      * <p>This is a convenience method that basically combines submitting a task via {@link
-     * #async(Task)} and then waiting for it to complete via {@link Task#await()}. (It's internally
-     * implemented almost like that, but not quite; it uses a [small] short-cut for optimization.)
+     * #async(Task)} and then waiting for it to complete via {@link Task#await()}.
      *
      * @param task the task to execute
      * @return the computed result of the task
