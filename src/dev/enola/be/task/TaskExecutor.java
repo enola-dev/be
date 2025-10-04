@@ -14,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class TaskExecutor implements AutoCloseable {
@@ -30,8 +29,7 @@ public class TaskExecutor implements AutoCloseable {
     // eviction policy.
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
-    // TODO Use dev.enola.common.concurrent; with logging, etc.
-    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
 
     // TODO @VisibleForTesting // Intentionally only package-private, for now
     <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
@@ -48,10 +46,23 @@ public class TaskExecutor implements AutoCloseable {
 
             Future<O> future;
             var timeout = task.timeout();
+
+            Callable<O> callable =
+                    () -> {
+                        var thread = Thread.currentThread();
+                        var originalThreadName = thread.getName();
+                        thread.setName(task.id().toString());
+                        try {
+                            return task.execute();
+                        } finally {
+                            thread.setName(originalThreadName);
+                        }
+                    };
+
             if (timeout.isZero() || timeout.isNegative()) {
-                future = executor.submit(task::execute);
+                future = executor.submit(callable);
             } else {
-                Collection<? extends Callable<O>> callables = List.of(task::execute);
+                Collection<? extends Callable<O>> callables = List.of(callable);
                 try {
                     // Nota bene: The risk of toMillis() throwing an ArithmeticException is
                     // unrealistically low, as that would require a timeout of more than ~292

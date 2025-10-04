@@ -23,6 +23,7 @@ public class TaskExecutorTest {
         testResubmitTaskFailure();
         testSubmitTaskToAnotherExecutorFailure();
         testExecutorClose();
+        testThreadNaming();
     }
 
     private static void testCompletedTask() throws Exception {
@@ -181,5 +182,19 @@ public class TaskExecutorTest {
         executor.future(task);
 
         executor.close();
+    }
+
+    private static void testThreadNaming() {
+        try (var executor = new TaskExecutor()) {
+            var task =
+                    new Task<Void, String>(null) {
+                        @Override
+                        protected String execute() throws Exception {
+                            return Thread.currentThread().getName();
+                        }
+                    };
+            var threadName = executor.await(task);
+            assert threadName.equals(task.id().toString());
+        }
     }
 }

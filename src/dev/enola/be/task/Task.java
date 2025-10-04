@@ -9,10 +9,12 @@ import java.util.function.Function;
 // TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
 
+    // TODO
+    // https://github.com/enola-dev/enola/blob/main/java/dev/enola/common/function/CheckedFunction.java
     public static <I, O> Task<I, O> create(I input, Function<I, O> function) {
         return new Task<>(input) {
             @Override
-            protected O execute() throws Exception {
+            protected O execute() {
                 return function.apply(input);
             }
         };
