@@ -3,8 +3,6 @@ package dev.enola.be.task;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -45,15 +43,21 @@ public abstract class Task<I, O> {
     public final Optional<O> output() {
         if (status() != Status.COMPLETED) return Optional.empty();
         Future<O> f = future.get(); // This is immediate, and won't fail
+        // But let's be defensive - even though neither should ever happen
+        if (f == null) throw new IllegalStateException("WTF?! " + this);
         if (!f.isDone()) throw new IllegalStateException("WTF?! " + f);
 
-        try {
-            return Optional.of(f.get());
+        return Optional.of(f.resultNow());
+    }
 
-            // TODO Re-use code from TaskExecutor.await() here...
-        } catch (CancellationException | InterruptedException | ExecutionException e) {
-            throw new IllegalStateException("Huh?!", e);
-        }
+    public final Optional<Throwable> failure() {
+        if (status() != Status.FAILED) return Optional.empty();
+        Future<O> f = future.get(); // This is immediate, and won't fail
+        // But let's be defensive - even though neither should ever happen
+        if (f == null) throw new IllegalStateException("WTF?! " + this);
+        if (!f.isDone()) throw new IllegalStateException("WTF?! " + f);
+
+        return Optional.of(f.exceptionNow());
     }
 
     public final Status status() {
@@ -106,6 +110,12 @@ public abstract class Task<I, O> {
         if (output.isPresent()) {
             sb.append("\noutput: ");
             sb.append(output.get());
+        }
+
+        var failure = failure();
+        if (failure.isPresent()) {
+            sb.append("\nfailure: ");
+            sb.append(failure.get().toString());
         }
 
         return sb.toString();
