@@ -96,17 +96,8 @@ public abstract class Task<I, O> {
         sb.append("\nstatus: ");
         sb.append(status());
 
-        var output = output();
-        if (output.isPresent()) {
-            sb.append("\noutput: ");
-            sb.append(output.get());
-        }
-
-        var failure = failure();
-        if (failure.isPresent()) {
-            sb.append("\nfailure: ");
-            sb.append(failure.get().toString());
-        }
+        output().ifPresent(o -> sb.append("\noutput: ").append(o));
+        failure().ifPresent(t -> sb.append("\nfailure: ").append(t));
 
         return sb.toString();
     }
