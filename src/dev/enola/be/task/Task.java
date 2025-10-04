@@ -15,6 +15,7 @@ public abstract class Task<I, O> {
     private final UUID id = UUID.randomUUID();
     private final AtomicReference<Future<O>> future = new AtomicReference<>();
     private /*TODO @Nullable*/ Instant startedAt;
+    private /*TODO @Nullable*/ Instant endedAt;
     protected final I input;
 
     protected Task(I input) {
@@ -64,7 +65,19 @@ public abstract class Task<I, O> {
         return Optional.ofNullable(startedAt);
     }
 
-    // TODO Optional<Instant> endedAt();
+    public final Optional<Instant> endedAt() {
+        return Optional.ofNullable(endedAt);
+    }
+
+    /* package-private */ final void endedAt(Instant endedAt) {
+        this.endedAt = endedAt;
+    }
+
+    public final Duration duration() {
+        if (startedAt == null) return Duration.ZERO;
+        if (endedAt == null) return Duration.between(startedAt, Instant.now());
+        return Duration.between(startedAt, endedAt);
+    }
 
     /** Progress, as 0-100%. */
     // TODO public int progress() {}
@@ -88,12 +101,18 @@ public abstract class Task<I, O> {
     public void toString(StringBuilder sb) {
         sb.append("type: Task # ");
         sb.append(getClass().getSimpleName());
+
         sb.append("\nid: ");
         sb.append(id().toString());
+
         sb.append("\nstatus: ");
         sb.append(status().toString());
 
         startedAt().ifPresent(s -> sb.append("\nstartedAt: ").append(s.toString()));
+        endedAt().ifPresent(e -> sb.append("\nendedAt: ").append(e.toString()));
+
+        sb.append("\nduration: ");
+        sb.append(duration().toString());
 
         if (timeout() != Duration.ZERO) {
             sb.append("\ntimeout: ");
