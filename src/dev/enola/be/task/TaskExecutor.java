@@ -38,30 +38,35 @@ public class TaskExecutor implements AutoCloseable {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
 
-        // This serves to detect if it was already submitted to ANOTHER TaskExecutor
-        if (task.status() != Status.PENDING)
-            throw new IllegalStateException("Task " + task.id() + " not PENDING: " + task.status());
+        // This serves to detect if it was already submitted to ANOTHER TaskExecutor;
+        // synchronizing on the task object ensures that checking its status and submitting it
+        // is an atomic operation across all threads and executors.
+        synchronized (task) {
+            if (task.status() != Status.PENDING)
+                throw new IllegalStateException(
+                        "Task " + task.id() + " not PENDING: " + task.status());
 
-        Future<O> future;
-        var timeout = task.timeout();
-        if (timeout.isZero() || timeout.isNegative()) {
-            future = executor.submit(task::execute);
-        } else {
-            Collection<? extends Callable<O>> callables = List.of(task::execute);
-            try {
-                // Nota bene: The risk of toMillis() throwing an ArithmeticException is
-                // unrealistically low, as that would require a timeout of more than ~292 million
-                // years... :-) But if that ever happens, we want to know about it, hence no
-                // try/catch here.
-                var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
-                future = futures.iterator().next();
-            } catch (InterruptedException e) {
-                future = CompletableFuture.failedFuture(e);
-                Thread.currentThread().interrupt();
+            Future<O> future;
+            var timeout = task.timeout();
+            if (timeout.isZero() || timeout.isNegative()) {
+                future = executor.submit(task::execute);
+            } else {
+                Collection<? extends Callable<O>> callables = List.of(task::execute);
+                try {
+                    // Nota bene: The risk of toMillis() throwing an ArithmeticException is
+                    // unrealistically low, as that would require a timeout of more than ~292
+                    // million  years... :-) But if that ever happens, we want to know about it,
+                    // hence no try/catch here.
+                    var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
+                    future = futures.iterator().next();
+                } catch (InterruptedException e) {
+                    future = CompletableFuture.failedFuture(e);
+                    Thread.currentThread().interrupt();
+                }
             }
+            task.future.set(future);
+            return future;
         }
-        task.future.set(future);
-        return future;
     }
 
     /**
