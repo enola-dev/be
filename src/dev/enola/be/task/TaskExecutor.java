@@ -55,7 +55,7 @@ public class TaskExecutor implements AutoCloseable {
                 try {
                     // Nota bene: The risk of toMillis() throwing an ArithmeticException is
                     // unrealistically low, as that would require a timeout of more than ~292
-                    // million  years... :-) But if that ever happens, we want to know about it,
+                    // million years... :-) But if that ever happens, we want to know about it,
                     // hence no try/catch here.
                     var futures = executor.invokeAll(callables, timeout.toMillis(), MILLISECONDS);
                     future = futures.iterator().next();
@@ -115,10 +115,12 @@ public class TaskExecutor implements AutoCloseable {
         }
     }
 
-    // TODO The implementation below would lose exceptions: calling future(task) submits the task,
-    // but does not expose the Future to the caller, so any exceptions thrown during execution are not observable.
-    // To preserve exceptions, consider returning the Future from submit(), or providing a callback for error handling.
-    //   public void submit(Task<?, ?> task) { future(task); }
+    // public void submit(Task<?, ?> task) { future(task); }
+    //   TODO A trivial ^^^ implementation would lose exceptions: Calling future(task) submits the
+    //        task, but does not expose the Future to the caller, so any exceptions thrown during
+    //        execution are not observable.
+    //        To preserve exceptions, consider returning the Future from submit(), or providing a
+    //        callback for error handling.
 
     public Task<?, ?> get(UUID id) throws IllegalArgumentException {
         var task = tasks.get(id);
