@@ -31,6 +31,8 @@ public class TaskExecutorTest {
             var task = new ImmediateTask("test");
             var future = executor.future(task);
             var result = future.get();
+            var output = task.output().get();
+            assert result == output : "The result and output objects must be the same";
             assert "Result: test".equals(result) : "Result should match expected output";
         }
     }

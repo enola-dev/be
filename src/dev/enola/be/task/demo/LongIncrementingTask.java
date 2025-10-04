@@ -47,8 +47,8 @@ public class LongIncrementingTask extends Task<Input, Output> {
         var input = new Input(10000, Duration.ofMillis(1));
         var task = new LongIncrementingTask(input, System.out::println);
         try (var executor = new dev.enola.be.task.TaskExecutor()) {
-            var output = executor.await(task);
-            System.out.println(task + " output: " + output);
+            executor.await(task);
+            System.out.println(task);
         }
     }
 }

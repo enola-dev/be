@@ -31,7 +31,7 @@ public class TaskExecutor implements AutoCloseable {
 
     private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
 
-    // TODO @VisibleForTesting // Intentionally only package-private, for now
+    // TODO private? Or @VisibleForTesting // Intentionally only package-private, for now
     <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
