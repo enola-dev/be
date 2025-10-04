@@ -27,6 +27,14 @@ public abstract class Task<I, O> {
     /**
      * The main logic of the task.
      *
+     * <p>This method is called by the {@link TaskExecutor} when the task is executed. It will run
+     * in a virtual thread of modern Java. For long-running tasks, please ensure to periodically
+     * check for interruption via {@link Thread#isInterrupted()} and terminate early if so, by
+     * throwing {@link InterruptedException}. Please do not, under any circumstances, use the
+     * ancient {@link Thread#yield()} method within implementations of this method (or anywhere
+     * really anymore, nowadays); as it will cause performance degradation by a factor of x100 for
+     * no benefit at all anymore on modern Java, especially on virtual threads.
+     *
      * @return output, never null (use {@link Empty#INSTANCE}; or {@link Optional}, if needed)
      * @throws Exception in case of any failure
      */

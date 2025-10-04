@@ -30,7 +30,7 @@ public class LongIncrementingTask extends Task<Input, Output> {
     protected Output execute() throws Exception {
         for (long i = 0; i < input.max; i++) {
             progressConsumer.accept(i);
-            Thread.yield();
+            // Do *NOT* Thread.yield(); that makes it really horribly slow, by like a factor x100!
             if (Thread.currentThread().isInterrupted())
                 throw new InterruptedException("Task was interrupted");
             Threads.sleep(input.sleep);
@@ -44,7 +44,7 @@ public class LongIncrementingTask extends Task<Input, Output> {
     private static void simpleLoop(long max, Duration sleep) throws InterruptedException {
         var start = Instant.now();
         for (long i = 0; i < max; i++) {
-            // Thread.yield();
+            // Do *NOT* Thread.yield(); that makes it really horribly slow, by like a factor x100!
             Threads.sleep(sleep);
         }
         var duration = Duration.between(start, Instant.now());
