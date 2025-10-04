@@ -14,7 +14,7 @@ public abstract class Task<I, O> {
 
     private final UUID id = UUID.randomUUID();
     private final AtomicReference<Future<O>> future = new AtomicReference<>();
-    private /*TODO @Nullable*/ Instant startedAt;
+    private volatile /*TODO @Nullable*/ Instant startedAt;
     private /*TODO @Nullable*/ Instant endedAt;
     protected final I input;
 
