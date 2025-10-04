@@ -2,6 +2,8 @@ package dev.enola.be.task;
 
 import static java.util.Objects.requireNonNull;
 
+import dev.enola.common.concurrent.Threads;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -30,10 +32,15 @@ public abstract class Task<I, O> {
      * <p>This method is called by the {@link TaskExecutor} when the task is executed. It will run
      * in a virtual thread of modern Java. For long-running tasks, please ensure to periodically
      * check for interruption via {@link Thread#isInterrupted()} and terminate early if so, by
-     * throwing {@link InterruptedException}. Please do not, under any circumstances, use the
-     * ancient {@link Thread#yield()} method within implementations of this method (or anywhere
-     * really anymore, nowadays); as it will cause performance degradation by a factor of x100 for
-     * no benefit at all anymore on modern Java, especially on virtual threads.
+     * throwing {@link InterruptedException}.
+     *
+     * <p>Please do not, under any circumstances, use the ancient {@link Thread#yield()} method
+     * within implementations of this method (or anywhere really anymore, nowadays); as it will
+     * cause performance degradation by a factor of x100 for no benefit at all anymore on modern
+     * Java, especially on virtual threads. If you must "simulate work", then please use our {@link
+     * Threads#sleep(Duration)} utility (instead of the JDK {@link Thread#sleep(long)}), which
+     * correctly handles interruption. (But this should really should only be required in tests and
+     * demos, not ever for any real work load.)
      *
      * @return output, never null (use {@link Empty#INSTANCE}; or {@link Optional}, if needed)
      * @throws Exception in case of any failure
