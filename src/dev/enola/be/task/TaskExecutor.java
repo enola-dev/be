@@ -72,7 +72,7 @@ public class TaskExecutor implements AutoCloseable {
                     Thread.currentThread().interrupt();
                 }
             }
-            task.future.set(future);
+            task.future(future);
             return future;
         }
     }

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class Task<I, O> {
 
     private final UUID id = UUID.randomUUID();
-    final AtomicReference<Future<O>> future = new AtomicReference<>();
+    private final AtomicReference<Future<O>> future = new AtomicReference<>();
     protected final I input;
 
     protected Task(I input) {
@@ -20,6 +20,12 @@ public abstract class Task<I, O> {
     }
 
     protected abstract O execute() throws Exception;
+
+    // package-private, for TaskExecutor (only)
+    final void future(Future<O> future) {
+        if (!this.future.compareAndSet(null, future))
+            throw new IllegalStateException("Future already set for task " + id());
+    }
 
     /** 🆔 */
     public final UUID id() {
@@ -58,7 +64,7 @@ public abstract class Task<I, O> {
     /** Progress, as 0-100%. */
     // TODO public int progress() {}
 
-    public void cancel() {
+    public final void cancel() {
         var f = future.get();
         if (f != null) f.cancel(true);
     }
@@ -100,7 +106,7 @@ public abstract class Task<I, O> {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         var sb = new StringBuilder();
         toString(sb);
         return sb.toString();
