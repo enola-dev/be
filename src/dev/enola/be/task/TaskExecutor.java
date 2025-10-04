@@ -95,7 +95,9 @@ public class TaskExecutor implements AutoCloseable {
      * @return the computed result
      * @throws IllegalStateException if the task was already submitted
      * @throws UncheckedTaskAwaitException if the task was cancelled, interrupted, or failed with an
-     *     exception. The cause can be inspected to determine the root cause.
+     *     checked exception (wrapped cause). The cause can be inspected to determine the root
+     *     cause. If the task fails with a {@link RuntimeException} or {@link Error}, it will be
+     *     re-thrown as-is and not wrapped.
      */
     public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
         Future<O> future = future(task);
