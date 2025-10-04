@@ -35,9 +35,9 @@ public class TaskExecutorTest {
     }
 
     private static void testFailingTasks() throws Exception {
-        testFailingTask(FailingTask.FailureMode.RUNTIME_EXCEPTION);
-        testFailingTask(FailingTask.FailureMode.CHECKED_EXCEPTION);
-        testFailingTask(FailingTask.FailureMode.ERROR);
+        for (FailingTask.FailureMode mode : FailingTask.FailureMode.values()) {
+            testFailingTask(mode);
+        }
     }
 
     private static void testFailingTask(FailingTask.FailureMode failureMode) throws Exception {
