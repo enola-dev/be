@@ -41,6 +41,13 @@ public class NonBlockingLineWriter extends TaskWithoutInputOutput implements Lin
                 delegate.println(line);
             }
         } catch (InterruptedException e) {
+            // We've been interrupted, which is the signal to shut down.
+            // But before we exit, let's process any remaining messages in the queue.
+            Object line;
+            while ((line = queue.poll()) != null) {
+                delegate.println(line);
+            }
+            // Re-set the interrupt flag to be a good citizen.
             Thread.currentThread().interrupt();
         }
     }

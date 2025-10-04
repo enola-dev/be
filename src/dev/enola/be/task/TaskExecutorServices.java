@@ -48,8 +48,6 @@ final class TaskExecutorServices {
         var start = System.currentTimeMillis();
         logger.fine(() -> "Starting to shut down ExecutorService " + executor);
 
-        // TODO Signal close() to all running tasks, so they can terminate gracefully & fast
-
         // TODO Then (only) use Java 19+ executor.close()
 
         executor.shutdown();
