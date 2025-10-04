@@ -23,7 +23,7 @@ public class TaskExecutorTest {
     private static void testSubmitTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
-            var future = executor.submit(task);
+            var future = executor.future(task);
             var result = future.get();
             assert "Result: test".equals(result) : "Result should match expected output";
         }
@@ -33,7 +33,7 @@ public class TaskExecutorTest {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
             var taskId = task.id();
-            executor.submit(task);
+            executor.future(task);
 
             var retrieved = executor.get(taskId);
             assert retrieved.id().equals(taskId) : "Retrieved task ID should match";
@@ -58,8 +58,8 @@ public class TaskExecutorTest {
             var task1 = new ImmediateTask("test1");
             var task2 = new ImmediateTask("test2");
 
-            executor.submit(task1);
-            executor.submit(task2);
+            executor.future(task1);
+            executor.future(task2);
 
             var taskIds = executor.list();
             assert taskIds.size() == 2 : "Should have 2 tasks, got " + taskIds.size();
@@ -74,7 +74,7 @@ public class TaskExecutorTest {
 
             assert task.status() == Status.PENDING : "Initial status should be PENDING";
 
-            var future = executor.submit(task);
+            var future = executor.future(task);
 
             Thread.sleep(100);
 
@@ -91,7 +91,7 @@ public class TaskExecutorTest {
     private static void testFailingTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new FailingTask("test");
-            var future = executor.submit(task);
+            var future = executor.future(task);
 
             try {
                 future.get();
@@ -109,7 +109,7 @@ public class TaskExecutorTest {
     private static void testCancelTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000);
-            var future = executor.submit(task);
+            var future = executor.future(task);
 
             Thread.sleep(100);
 
@@ -125,10 +125,10 @@ public class TaskExecutorTest {
     private static void testResubmitTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new ImmediateTask("test");
-            executor.submit(task);
+            executor.future(task);
 
             try {
-                executor.submit(task);
+                executor.future(task);
                 assert false : "Should have thrown IllegalStateException on resubmit";
             } catch (IllegalStateException e) {
                 assert e.getMessage().contains("already submitted")
@@ -140,7 +140,7 @@ public class TaskExecutorTest {
     private static void testExecutorClose() throws Exception {
         var executor = new TaskExecutor();
         var task = new ImmediateTask("test");
-        executor.submit(task);
+        executor.future(task);
 
         executor.close();
     }

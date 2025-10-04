@@ -23,12 +23,24 @@ public class TaskExecutor implements AutoCloseable {
     // TODO Use dev.enola.common.concurrent; with logging, etc.
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
-    public <O> Future<O> submit(Task<?, O> task) {
+    // TODO @VisibleForTesting // Intentionally only package-private, for now
+    <O> Future<O> future(Task<?, O> task) {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
         Future<O> future = executor.submit(task::execute);
         task.future.set(future);
         return future;
+    }
+
+    // TODO Should NOT throws Exception
+    public <O> O await(Task<?, O> task) throws Exception {
+        Future<O> future = future(task);
+        return future.get();
+    }
+
+    // TODO Should NOT throws Exception
+    public void submit(Task<?, ?> task) throws Exception {
+        future(task);
     }
 
     public Task<?, ?> get(UUID id) {
