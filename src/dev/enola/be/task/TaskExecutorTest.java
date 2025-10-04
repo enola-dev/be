@@ -6,6 +6,8 @@ import dev.enola.be.task.test.SlowTask;
 
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 public class TaskExecutorTest {
 
@@ -40,7 +42,7 @@ public class TaskExecutorTest {
             try {
                 future.get();
                 assert false : "Should have thrown an exception";
-            } catch (Exception e) {
+            } catch (ExecutionException e) {
                 // Expected
             }
 
@@ -51,8 +53,12 @@ public class TaskExecutorTest {
     private static void testTimingOutTask() throws Exception {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000, Duration.ofMillis(1));
-            executor.future(task);
-            Thread.sleep(10);
+            try {
+                executor.await(task);
+                assert false : "Should have thrown an exception due to timeout";
+            } catch (CancellationException e) {
+                // Expected
+            }
             assert task.status() == Status.CANCELLED
                     : "Status should now be CANCELLED, but is " + task.status();
         }
@@ -118,11 +124,9 @@ public class TaskExecutorTest {
 
             var future = executor.future(task);
 
-            Thread.sleep(10);
-
             var status = task.status();
-            assert status == Status.IN_PROGRESS || status == Status.COMPLETED
-                    : "Status should be IN_PROGRESS or COMPLETED, got " + status;
+            assert status == Status.IN_PROGRESS
+                    : "Status should still be IN_PROGRESS, got " + status;
 
             future.get();
 
@@ -156,7 +160,7 @@ public class TaskExecutorTest {
                 assert false : "Should have thrown IllegalStateException on resubmit";
             } catch (IllegalStateException e) {
                 assert e.getMessage().contains("not PENDING")
-                        : "Error message should mention 'not PENDING:'";
+                        : "Error message should mention 'not PENDING'";
             }
         }
     }
