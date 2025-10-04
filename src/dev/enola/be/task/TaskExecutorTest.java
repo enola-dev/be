@@ -132,7 +132,7 @@ public class TaskExecutorTest {
 
             future.get();
 
-            assert task.status() == Status.COMPLETED : "Final status should be SUCCESSFUL";
+            assert task.status() == Status.COMPLETED : "Final status should be COMPLETED";
         }
     }
 
