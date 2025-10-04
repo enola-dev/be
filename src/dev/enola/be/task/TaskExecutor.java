@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,7 +31,7 @@ public class TaskExecutor implements AutoCloseable {
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     // TODO @VisibleForTesting // Intentionally only package-private, for now
-    <O> Future<O> future(Task<?, O> task) {
+    <O> Future<O> future(Task<?, O> task) throws IllegalStateException {
         if (tasks.putIfAbsent(task.id(), task) != null)
             throw new IllegalStateException("Task already submitted: " + task.id());
 
@@ -56,18 +57,32 @@ public class TaskExecutor implements AutoCloseable {
         return future;
     }
 
-    // TODO Should NOT throws Exception
-    public <O> O await(Task<?, O> task) throws Exception {
+    public <O> O await(Task<?, O> task) throws IllegalStateException, UncheckedTaskAwaitException {
         Future<O> future = future(task);
-        return future.get();
+        try {
+            return future.get();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new UncheckedTaskAwaitException("Task canceled (interrupted)", e);
+
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new UncheckedTaskAwaitException(
+                    "Task execution failed: " + cause.getMessage(), cause);
+        }
     }
 
-    // TODO Should NOT throws Exception
-    public void submit(Task<?, ?> task) throws Exception {
-        future(task);
-    }
+    // TODO Re-think this, if needed; as-is, you would lose the Exception in case of failure!
+    //   public void submit(Task<?, ?> task) { future(task); }
 
-    public Task<?, ?> get(UUID id) {
+    public Task<?, ?> get(UUID id) throws IllegalArgumentException {
         var task = tasks.get(id);
         if (task == null) throw new IllegalArgumentException("No such task: " + id);
         return task;
@@ -78,7 +93,7 @@ public class TaskExecutor implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws InterruptedException {
         executor.shutdown();
         if (!executor.awaitTermination(7, TimeUnit.SECONDS)) executor.shutdownNow();
     }
