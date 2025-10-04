@@ -8,6 +8,8 @@ import java.util.function.Function;
 // TODO ErrorProne @Immutable ?
 public abstract class Task<I, O> {
 
+    // TODO Support timeout.. but here, or in TaskExecutor?
+
     public static <I, O> Task<I, O> create(I input, Function<I, O> function) {
         return new Task<>(input) {
             @Override
@@ -41,7 +43,7 @@ public abstract class Task<I, O> {
         if (future == null) return Status.PENDING;
         return switch (future.state()) {
             case RUNNING -> Status.IN_PROGRESS;
-            case SUCCESS -> Status.SUCCESSFUL;
+            case SUCCESS -> Status.COMPLETED;
             case FAILED -> Status.FAILED;
             case CANCELLED -> Status.CANCELLED;
         };
