@@ -13,7 +13,7 @@ public class TaskExecutorTest {
 
     public static void main(String[] args) throws Exception {
         testCompletedTask();
-        testFailingTask();
+        testFailingTasks();
         testTimingOutTask();
         testCancelTask();
         testGetTask();
@@ -35,9 +35,15 @@ public class TaskExecutorTest {
         }
     }
 
-    private static void testFailingTask() throws Exception {
+    private static void testFailingTasks() throws Exception {
+        for (FailingTask.FailureMode mode : FailingTask.FailureMode.values()) {
+            testFailingTask(mode);
+        }
+    }
+
+    private static void testFailingTask(FailingTask.FailureMode failureMode) throws Exception {
         try (var executor = new TaskExecutor()) {
-            var task = new FailingTask("test");
+            var task = new FailingTask(failureMode);
             var future = executor.future(task);
 
             try {
