@@ -24,6 +24,8 @@ public class TaskExecutor implements AutoCloseable {
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     public <O> Future<O> submit(Task<?, O> task) {
+        if (!Status.PENDING.equals(task.status()))
+            throw new IllegalStateException("Task already submitted: " + task.id());
         tasks.put(task.id(), task);
         Future<O> future = executor.submit(task::execute);
         task.future.set(future);

@@ -16,6 +16,7 @@ public class TaskExecutorTest {
         testTaskStatusProgression();
         testFailingTask();
         testCancelTask();
+        testResubmitTask();
         testExecutorClose();
     }
 
@@ -24,7 +25,7 @@ public class TaskExecutorTest {
             var task = new ImmediateTask("test");
             var future = executor.submit(task);
             var result = future.get();
-            assert result.equals("Result: test") : "Result should match expected output";
+            assert "Result: test".equals(result) : "Result should match expected output";
         }
     }
 
@@ -118,6 +119,21 @@ public class TaskExecutorTest {
 
             assert task.status() == Status.CANCELLED : "Status should be CANCELLED after cancel()";
             assert future.isCancelled() : "Future should be cancelled";
+        }
+    }
+
+    private static void testResubmitTask() throws Exception {
+        try (var executor = new TaskExecutor()) {
+            var task = new ImmediateTask("test");
+            executor.submit(task);
+
+            try {
+                executor.submit(task);
+                assert false : "Should have thrown IllegalStateException on resubmit";
+            } catch (IllegalStateException e) {
+                assert e.getMessage().contains("already submitted")
+                        : "Error message should mention 'already submitted'";
+            }
         }
     }
 

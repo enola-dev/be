@@ -17,5 +17,5 @@ java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.TaskExecutorTe
 if command -v pre-commit &> /dev/null
 then
     # pre-commit run
-    pre-commit install
+    pre-commit install &> /dev/null
 fi
