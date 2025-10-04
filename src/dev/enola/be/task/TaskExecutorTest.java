@@ -67,6 +67,8 @@ public class TaskExecutorTest {
             var toString = task.toString();
             assert !toString.contains("output") : "toString should not contain output";
             assert toString.contains("status: FAILED") : "toString should contain FAILED";
+            assert toString.contains("failure:") : "toString should contain failure:";
+            assert toString.contains("exception") : "toString should contain exception";
         }
     }
 

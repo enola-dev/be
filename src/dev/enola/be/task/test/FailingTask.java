@@ -26,7 +26,7 @@ public class FailingTask extends Task<Void, String> {
         switch (failureMode) {
             case RUNTIME_EXCEPTION -> throw new RuntimeException("Intentional runtime exception");
             case CHECKED_EXCEPTION -> throw new Exception("Intentional checked exception");
-            case ERROR -> throw new Error("Intentional error");
+            case ERROR -> throw new Error("Intentional error exception");
             default -> throw new IllegalStateException("Unknown failure mode: " + failureMode);
         }
     }
