@@ -44,6 +44,12 @@ public class TaskExecutor implements AutoCloseable {
             Executors.newSingleThreadScheduledExecutor("TaskExecutor-Cleanup", LOG);
 
     public TaskExecutor(Duration completedTaskEvictionInterval) {
+        if (completedTaskEvictionInterval == null) {
+            throw new IllegalArgumentException("completedTaskEvictionInterval must not be null");
+        }
+        if (completedTaskEvictionInterval.isNegative() || completedTaskEvictionInterval.isZero()) {
+            throw new IllegalArgumentException("completedTaskEvictionInterval must be positive");
+        }
         var m = completedTaskEvictionInterval.toMillis();
         cleanupScheduler.scheduleAtFixedRate(this::evictCompletedTasks, m, m, MILLISECONDS);
     }
