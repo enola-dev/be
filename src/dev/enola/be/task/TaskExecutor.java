@@ -1,7 +1,9 @@
 package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
@@ -22,20 +24,36 @@ public class TaskExecutor implements AutoCloseable {
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
 
-    // TODO Eviction policy of completed tasks?! As-is, this leaks memory...
-    // E.g. periodically scan the map and remove tasks that are in a terminal state.
-    // Persist them first, so that get() can still find them later; with separate
-    // eviction policy.
+    // This map has a basic time-based eviction policy; see constructor.
+    // A more sophisticated implementation could persist completed tasks, so that get()
+    // can still find them later, with a separate eviction policy for that persistent store.
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
     private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
 
-    // TODO Can the timeoutScheduler also use virtual threads?
+    // TODO Can the timeoutScheduler & cleanupScheduler also use virtual threads?
     //   (Would need to check if ScheduledExecutorService supports that.)
     //
-    // TODO Either way, use LoggingScheduledExecutorService from Enola Commons?
+    // TODO Either way, use LoggingScheduledExecutorService from Enola Commons, for both.
+
     private final ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor();
+
+    private final ScheduledExecutorService cleanupScheduler =
+            Executors.newSingleThreadScheduledExecutor();
+
+    public TaskExecutor(Duration completedTaskEvictionInterval) {
+        var m = completedTaskEvictionInterval.toMinutes();
+        cleanupScheduler.scheduleAtFixedRate(this::evictCompletedTasks, m, m, MINUTES);
+    }
+
+    public TaskExecutor() {
+        this(Duration.ofHours(1));
+    }
+
+    private void evictCompletedTasks() {
+        tasks.values().removeIf(task -> task.status().isTerminal());
+    }
 
     private static class LoggingFutureTask<V> extends FutureTask<V> {
         private final Task<?, V> task;
@@ -129,5 +147,6 @@ public class TaskExecutor implements AutoCloseable {
 
         executor.close();
         timeoutScheduler.close();
+        cleanupScheduler.close();
     }
 }
