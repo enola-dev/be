@@ -22,23 +22,20 @@ public final class Executors {
         return java.util.concurrent.Executors.newThreadPerTaskExecutor(tf);
     }
 
-    private static ThreadFactory createVirtualThreadFactory(Logger logger) {
-        return Thread.ofVirtual()
-                .uncaughtExceptionHandler(toLogger(logger))
+    private static ThreadFactory createVirtualThreadFactory(String namePrefix, Logger logger) {
+        var builder = Thread.ofVirtual();
+        if (namePrefix != null) {
+            builder.name(namePrefix, 1);
+        }
+        return builder.uncaughtExceptionHandler(toLogger(logger))
                 // NB: Virtual threads are always daemon threads, so no: .setDaemon(true)
                 // TODO new ContextAwareThreadFactory() how-to?
                 // TODO .inheritInheritableThreadLocals(true) ?
                 .factory();
     }
 
-    private static ThreadFactory createVirtualThreadFactory(String namePrefix, Logger logger) {
-        return Thread.ofVirtual()
-                .name(namePrefix, 1)
-                .uncaughtExceptionHandler(toLogger(logger))
-                // NB: Virtual threads are always daemon threads, so no: .setDaemon(true)
-                // TODO new ContextAwareThreadFactory() how-to?
-                // TODO .inheritInheritableThreadLocals(true) ?
-                .factory();
+    private static ThreadFactory createVirtualThreadFactory(Logger logger) {
+        return createVirtualThreadFactory(null, logger);
     }
 
     private Executors() {}

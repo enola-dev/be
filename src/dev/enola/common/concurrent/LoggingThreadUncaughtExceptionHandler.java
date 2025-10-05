@@ -8,10 +8,6 @@ import java.util.logging.Logger;
 
 class LoggingThreadUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-    // Like dev.enola.common.concurrent.LoggingThreadUncaughtExceptionHandler in
-    // https://github.com/enola-dev/enola, but without the dependency on dev.enola.common and using
-    // JUL instead of SLF4J. TODO Maybe move this to dev.enola.common, later?
-
     private final Logger logger;
 
     private LoggingThreadUncaughtExceptionHandler(Logger logger) {
