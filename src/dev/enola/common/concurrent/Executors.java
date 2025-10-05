@@ -39,7 +39,7 @@ public final class Executors {
     private static ThreadFactory createVirtualThreadFactory(String namePrefix, Logger logger) {
         var builder = Thread.ofVirtual();
         if (namePrefix != null) {
-            builder.name(namePrefix, 1);
+            builder = builder.name(namePrefix, 1);
         }
         return builder.uncaughtExceptionHandler(toLogger(logger))
                 // NB: Virtual threads are always daemon threads, so no: .setDaemon(true)
