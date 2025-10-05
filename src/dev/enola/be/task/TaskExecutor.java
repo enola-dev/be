@@ -3,6 +3,8 @@ package dev.enola.be.task;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import dev.enola.common.concurrent.Executors;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -11,7 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,15 +30,20 @@ public class TaskExecutor implements AutoCloseable {
     // can still find them later, with a separate eviction policy for that persistent store.
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
-    private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
-
-    // TODO Use LoggingScheduledExecutorService from Enola Commons, for both.
+    // Nota bene: In *THEORY* we should *NEVER* have *ANY* uncaught exceptions from Task,
+    // because any exception thrown by the task's `execute()` method would be caught and
+    // wrapped in an ExecutionException by the Future returned by ExecutorService.submit().
+    //
+    // But in practice, who knows what the future holds, so we better log them just in case;
+    // just because "swallowed" lost exceptions are seriously the worst kind of bugs to diagnose!
+    private final ExecutorService executor =
+            Executors.newVirtualThreadPerTaskExecutorWithLoggingThreadUncaughtExceptionHandler(LOG);
 
     private final ScheduledExecutorService timeoutScheduler =
-            Executors.newSingleThreadScheduledExecutor();
+            Executors.newSingleThreadScheduledExecutor("TaskExecutor-Timeout", LOG);
 
     private final ScheduledExecutorService cleanupScheduler =
-            Executors.newSingleThreadScheduledExecutor();
+            Executors.newSingleThreadScheduledExecutor("TaskExecutor-Cleanup", LOG);
 
     public TaskExecutor(Duration completedTaskEvictionInterval) {
         var m = completedTaskEvictionInterval.toMinutes();
