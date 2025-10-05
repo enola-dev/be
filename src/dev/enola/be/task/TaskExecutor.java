@@ -31,10 +31,7 @@ public class TaskExecutor implements AutoCloseable {
 
     private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
 
-    // TODO Can the timeoutScheduler & cleanupScheduler also use virtual threads?
-    //   (Would need to check if ScheduledExecutorService supports that.)
-    //
-    // TODO Either way, use LoggingScheduledExecutorService from Enola Commons, for both.
+    // TODO Use LoggingScheduledExecutorService from Enola Commons, for both.
 
     private final ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor();
