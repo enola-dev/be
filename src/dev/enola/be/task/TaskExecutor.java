@@ -1,7 +1,11 @@
 package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
+import dev.enola.common.concurrent.Executors;
+
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,20 +25,38 @@ public class TaskExecutor implements AutoCloseable {
     // TODO Synthetic "root" task, to which all running tasks are children?
     // This could be useful for managing task hierarchies and dependencies.
 
-    // TODO Eviction policy of completed tasks?! As-is, this leaks memory...
-    // E.g. periodically scan the map and remove tasks that are in a terminal state.
-    // Persist them first, so that get() can still find them later; with separate
-    // eviction policy.
+    // This map has a basic time-based eviction policy; see constructor.
+    // A more sophisticated implementation could persist completed tasks, so that get()
+    // can still find them later, with a separate eviction policy for that persistent store.
     private final Map<UUID, Task<?, ?>> tasks = new ConcurrentHashMap<>();
 
-    private final ExecutorService executor = TaskExecutorServices.newVirtualThreadPerTaskExecutor();
-
-    // TODO Can the timeoutScheduler also use virtual threads?
-    //   (Would need to check if ScheduledExecutorService supports that.)
+    // Nota bene: In *THEORY* we should *NEVER* have *ANY* uncaught exceptions from Task,
+    // because any exception thrown by the task's `execute()` method would be caught and
+    // wrapped in an ExecutionException by the Future returned by ExecutorService.submit().
     //
-    // TODO Either way, use LoggingScheduledExecutorService from Enola Commons?
+    // But in practice, who knows what the future holds, so we better log them just in case;
+    // just because "swallowed" lost exceptions are seriously the worst kind of bugs to diagnose!
+    private final ExecutorService executor =
+            Executors.newVirtualThreadPerTaskExecutorWithLoggingThreadUncaughtExceptionHandler(LOG);
+
     private final ScheduledExecutorService timeoutScheduler =
-            Executors.newSingleThreadScheduledExecutor();
+            Executors.newSingleThreadScheduledExecutor("TaskExecutor-Timeout", LOG);
+
+    private final ScheduledExecutorService cleanupScheduler =
+            Executors.newSingleThreadScheduledExecutor("TaskExecutor-Cleanup", LOG);
+
+    public TaskExecutor(Duration completedTaskEvictionInterval) {
+        var m = completedTaskEvictionInterval.toMillis();
+        cleanupScheduler.scheduleAtFixedRate(this::evictCompletedTasks, m, m, MILLISECONDS);
+    }
+
+    public TaskExecutor() {
+        this(Duration.ofHours(1));
+    }
+
+    private void evictCompletedTasks() {
+        tasks.values().removeIf(task -> task.status().isTerminal());
+    }
 
     private static class LoggingFutureTask<V> extends FutureTask<V> {
         private final Task<?, V> task;
@@ -127,7 +148,8 @@ public class TaskExecutor implements AutoCloseable {
             task.cancel();
         }
 
-        executor.close();
+        cleanupScheduler.close();
         timeoutScheduler.close();
+        executor.close();
     }
 }
