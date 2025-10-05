@@ -11,7 +11,7 @@ public final class Executors {
 
     public static ScheduledExecutorService newSingleThreadScheduledExecutor(
             String namePrefix, Logger logger) {
-        var tf = createVirtualThreadFactory(namePrefix, logger);
+        var tf = createThreadFactory(namePrefix, logger);
         return java.util.concurrent.Executors.newSingleThreadScheduledExecutor(tf);
     }
 
@@ -20,6 +20,16 @@ public final class Executors {
                     Logger logger) {
         var tf = createVirtualThreadFactory(logger);
         return java.util.concurrent.Executors.newThreadPerTaskExecutor(tf);
+    }
+
+    private static ThreadFactory createThreadFactory(String namePrefix, Logger logger) {
+        return Thread.ofPlatform()
+                .name(namePrefix, 1)
+                .uncaughtExceptionHandler(toLogger(logger))
+                .daemon(true)
+                // TODO new ContextAwareThreadFactory() how-to?
+                // TODO .inheritInheritableThreadLocals(true) ?
+                .factory();
     }
 
     private static ThreadFactory createVirtualThreadFactory(String namePrefix, Logger logger) {
