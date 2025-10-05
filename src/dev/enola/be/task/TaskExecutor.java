@@ -35,8 +35,7 @@ public class TaskExecutor implements AutoCloseable {
     //
     // But in practice, who knows what the future holds, so we better log them just in case;
     // just because "swallowed" lost exceptions are seriously the worst kind of bugs to diagnose!
-    private final ExecutorService executor =
-            Executors.newVirtualThreadPerTaskExecutorWithLoggingThreadUncaughtExceptionHandler(LOG);
+    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor(LOG);
 
     private final ScheduledExecutorService timeoutScheduler =
             Executors.newSingleThreadScheduledExecutor("TaskExecutor-Timeout", LOG);

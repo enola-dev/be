@@ -15,9 +15,13 @@ public final class Executors {
         return java.util.concurrent.Executors.newSingleThreadScheduledExecutor(tf);
     }
 
-    public static ExecutorService
-            newVirtualThreadPerTaskExecutorWithLoggingThreadUncaughtExceptionHandler(
-                    Logger logger) {
+    public static ExecutorService newVirtualThreadPerTaskExecutor(
+            String namePrefix, Logger logger) {
+        var tf = createVirtualThreadFactory(namePrefix, logger);
+        return java.util.concurrent.Executors.newThreadPerTaskExecutor(tf);
+    }
+
+    public static ExecutorService newVirtualThreadPerTaskExecutor(Logger logger) {
         var tf = createVirtualThreadFactory(logger);
         return java.util.concurrent.Executors.newThreadPerTaskExecutor(tf);
     }
