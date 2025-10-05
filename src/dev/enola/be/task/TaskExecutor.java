@@ -1,7 +1,7 @@
 package dev.enola.be.task;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import dev.enola.common.concurrent.Executors;
 
@@ -46,8 +46,8 @@ public class TaskExecutor implements AutoCloseable {
             Executors.newSingleThreadScheduledExecutor("TaskExecutor-Cleanup", LOG);
 
     public TaskExecutor(Duration completedTaskEvictionInterval) {
-        var m = completedTaskEvictionInterval.toMinutes();
-        cleanupScheduler.scheduleAtFixedRate(this::evictCompletedTasks, m, m, MINUTES);
+        var m = completedTaskEvictionInterval.toSeconds();
+        cleanupScheduler.scheduleAtFixedRate(this::evictCompletedTasks, m, m, SECONDS);
     }
 
     public TaskExecutor() {
