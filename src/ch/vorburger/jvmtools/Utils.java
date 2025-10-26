@@ -30,8 +30,4 @@ final class Utils {
     }
 
     private Utils() {}
-
-    public static void assertTrue(boolean check) {
-        if (!check) throw new AssertionError();
-    }
 }

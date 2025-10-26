@@ -1,10 +1,12 @@
 package ch.vorburger.jvmtools;
 
+import static ch.vorburger.jvmtools.Assert.assertTrue;
+
 public class ClasspathTest {
 
     public static void main(String[] args) {
         var classpath = Classpath.from(ClasspathTest.class.getClassLoader());
-        Utils.assertTrue(classpath.get("ch/vorburger/jvmtools/ClasspathTest.class") != null);
-        Utils.assertTrue(classpath.get("ch/vorburger/jvmtools/ClasspathTest.java") != null);
+        assertTrue(classpath.get("ch/vorburger/jvmtools/ClasspathTest.class") != null);
+        assertTrue(classpath.get("ch/vorburger/jvmtools/ClasspathTest.java") != null);
     }
 }
