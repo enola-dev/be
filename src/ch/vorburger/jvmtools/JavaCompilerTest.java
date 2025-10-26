@@ -14,6 +14,7 @@ public class JavaCompilerTest {
         sourcepath.addPath(Path.of("src/ch/vorburger/jvmtools/Hello.java"));
 
         // TODO Use JUnit utility for auto-cleaned test specific output directory
+        //   @ClassRule public static final TemporaryFolder tempFolder = new TemporaryFolder();
         var outputDirectory = Path.of(".build/JavaCompilerTest");
         var outputClassFile = outputDirectory.resolve("ch/vorburger/jvmtools/Hello.class").toFile();
         outputClassFile.delete();

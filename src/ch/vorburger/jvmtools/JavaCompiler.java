@@ -6,6 +6,7 @@ import ch.vorburger.stereotype.Service;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import javax.tools.Diagnostic;
 import javax.tools.Diagnostic.Kind;
@@ -32,8 +33,13 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
                 return this;
             }
 
-            // TODO Glob
-            public Builder sourceAdd(Path path) {
+            public Builder source(Stream<Path> paths) {
+                // TODO Optimization: Keep Stream, and start compiling right away from it...
+                paths.forEach(this.sourcepath::addPath);
+                return this;
+            }
+
+            public Builder source(Path path) {
                 this.sourcepath.addPath(path);
                 return this;
             }

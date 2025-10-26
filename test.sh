@@ -10,6 +10,8 @@ find src -name '*.java' ! -name '*Test.java' ! -name 'Test*.java' -print0 \
 find src \( -name '*Test.java' -o -name 'Test*.java' \) -print0 \
   | xargs -0 javac -cp .build/classes -d .build/test-classes
 
+java -cp .build/classes:.build/test-classes:src dev.enola.be.io.FileSetTest
+
 java -cp .build/classes:.build/test-classes:src ch.vorburger.main.test.ExampleTest
 
 java -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.ClasspathTest

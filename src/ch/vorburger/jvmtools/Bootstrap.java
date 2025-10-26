@@ -12,9 +12,9 @@ public class Bootstrap {
 
         var input =
                 new JavaCompiler.Input.Builder()
-                        // TODO Glob
-                        .sourceAdd(Path.of("src/ch/vorburger/jvmtools/JavaCompiler.java"))
-                        .sourceAdd(Path.of("src/ch/vorburger/jvmtools/JavaCompilerTest.java"))
+                        // TODO FileSet Glob
+                        .source(Path.of("src/ch/vorburger/jvmtools/JavaCompiler.java"))
+                        .source(Path.of("src/ch/vorburger/jvmtools/JavaCompilerTest.java"))
                         .outputDirectory(".build/bootstrap-classes")
                         .build();
         assertTrue(new JavaCompiler().invoke(input));
