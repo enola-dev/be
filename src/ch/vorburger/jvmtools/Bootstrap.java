@@ -2,7 +2,7 @@ package ch.vorburger.jvmtools;
 
 public class Bootstrap {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         var compiler = new JavaCompiler();
 
         // TODO Glob
@@ -13,7 +13,7 @@ public class Bootstrap {
         var classpath = new Classpath();
         classpath.setOutputDirectory(".build/bootstrap-classes");
 
-        compiler.compile(new JavaCompiler.Input(sourcepath, classpath));
+        // TODO compiler.invoke(new JavaCompiler.Input(StdIO.system(), sourcepath, classpath));
 
         // TODO JAR
     }

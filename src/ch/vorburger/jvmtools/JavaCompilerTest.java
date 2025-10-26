@@ -2,7 +2,7 @@ package ch.vorburger.jvmtools;
 
 public class JavaCompilerTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         var compiler = new JavaCompiler();
 
         // TODO Glob
@@ -12,7 +12,10 @@ public class JavaCompilerTest {
         var classpath = new Classpath();
         classpath.setOutputDirectory(".build/jvmtools-test-classes");
 
-        compiler.compile(new JavaCompiler.Input(sourcepath, classpath));
+        var stdIO = ch.vorburger.exec.StdIO.inMemory();
+        // TODO assert compiler.invoke(new JavaCompiler.Input(stdIO, sourcepath, classpath)) ==
+        // true;
+        stdIO.assertErrorEmpty();
 
         // TODO Test presence of Hello.class file (delete it at start of test!)
     }

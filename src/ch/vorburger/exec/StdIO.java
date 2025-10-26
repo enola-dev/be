@@ -5,10 +5,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -39,6 +42,14 @@ public interface StdIO {
         return new PrintStream(err(), true, errorCharset());
     }
 
+    default Writer outWriter() {
+        return new OutputStreamWriter(out(), outputCharset());
+    }
+
+    default Writer errWriter() {
+        return new OutputStreamWriter(err(), errorCharset());
+    }
+
     default String outString() {
         if (out() instanceof ByteArrayOutputStream baos) return baos.toString(outputCharset());
         throw new UnsupportedOperationException("out() is not a ByteArrayOutputStream");
@@ -47,6 +58,21 @@ public interface StdIO {
     default String errString() {
         if (err() instanceof ByteArrayOutputStream baos) return baos.toString(errorCharset());
         throw new UnsupportedOperationException("err() is not a ByteArrayOutputStream");
+    }
+
+    default void flush() throws IOException {
+        out().flush();
+        err().flush();
+    }
+
+    /** Intended to be called after tests to assert no error output happened. */
+    default void assertErrorEmpty() throws AssertionError, IOException {
+        flush();
+        System.out.print(outString());
+        String err = errString();
+        if (!err.isEmpty()) {
+            throw new AssertionError("Expected empty stderr, but was: " + err);
+        }
     }
 
     // https://github.com/enola-dev/enola/blob/main/java/dev/enola/common/linereader/SystemInOutIO.java
