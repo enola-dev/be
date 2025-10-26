@@ -5,12 +5,16 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public abstract class Classpath {
 
-    public static Classpath from(Set<URL> urls) {
+    public static Classpath from(Path... paths) {
+        return from(Arrays.stream(paths).map(p -> Utils.toURL(p.toUri())).toList());
+    }
+
+    public static Classpath from(Collection<URL> urls) {
         return from(new URLClassLoader(urls.toArray(new URL[urls.size()])));
     }
 
@@ -19,6 +23,8 @@ public abstract class Classpath {
     }
 
     abstract URL get(String resourcePath);
+
+    abstract ClassLoader getClassLoader();
 
     private static class ClassLoaderClasspath extends Classpath {
         private final ClassLoader classLoader;
@@ -40,6 +46,11 @@ public abstract class Classpath {
                 throw new IllegalArgumentException(resourcePath + " found multiple times:" + urls);
             }
             return urls.get(0);
+        }
+
+        @Override
+        ClassLoader getClassLoader() {
+            return classLoader;
         }
     }
 
