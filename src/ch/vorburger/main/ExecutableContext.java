@@ -1,4 +1,4 @@
-package ch.vorburger.exec;
+package ch.vorburger.main;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,6 +11,10 @@ import java.util.Map;
 public record ExecutableContext(Path cwd, StdIO stdIO, List<String> args, Map<String, String> env) {
 
     // TODO Supplier<Path> cwd() to support lazy evaluation...
+
+    public String[] argsAsArray() {
+        return args.toArray(new String[0]);
+    }
 
     public static class Builder {
         private Path cwd = Paths.get("").toAbsolutePath();
@@ -35,6 +39,11 @@ public record ExecutableContext(Path cwd, StdIO stdIO, List<String> args, Map<St
 
         public Builder addArgs(String[] args) {
             for (String arg : args) this.args.add(arg);
+            return this;
+        }
+
+        public Builder addArg(String arg) {
+            this.args.add(arg);
             return this;
         }
 

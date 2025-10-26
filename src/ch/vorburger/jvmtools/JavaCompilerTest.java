@@ -12,7 +12,7 @@ public class JavaCompilerTest {
         var classpath = new Classpath();
         classpath.setOutputDirectory(".build/jvmtools-test-classes");
 
-        var stdIO = ch.vorburger.exec.StdIO.inMemory();
+        var stdIO = ch.vorburger.main.StdIO.inMemory();
         // TODO assert compiler.invoke(new JavaCompiler.Input(stdIO, sourcepath, classpath)) ==
         // true;
         stdIO.assertErrorEmpty();

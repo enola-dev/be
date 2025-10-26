@@ -6,7 +6,7 @@ repos:
   - id: check-case-conflict
   - id: check-executables-have-shebangs
   - id: check-json
-        # https://github.com/pre-commit/pre-commit-hooks/issues/1196
+          # https://github.com/pre-commit/pre-commit-hooks/issues/1196
     exclude: ^\.vscode/.*\.json$
   - id: check-merge-conflict
   - id: check-shebang-scripts-are-executable
@@ -21,14 +21,14 @@ repos:
     exclude: ^(LICENSE-header.txt|.*test-random-binary|.*.svg|.*.expected|third_party/.*|.flox/env/manifest.lock)$
   - id: trailing-whitespace
   - id: pretty-format-json
-        # https://github.com/pre-commit/pre-commit-hooks/issues/1196
+          # https://github.com/pre-commit/pre-commit-hooks/issues/1196
     exclude: ^\.vscode/.*\.json$
 
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
   rev: v2.14.0
   hooks:
   - id: pretty-format-java
-        # Keep this version in sync with the same version in .vscode/settings.json
+          # Keep this version in sync with the same version in .vscode/settings.json
     args: [--autofix, --aosp, --google-java-formatter-version=1.29.0]
 
   - id: pretty-format-yaml
@@ -39,9 +39,9 @@ repos:
   hooks:
   - id: nixfmt-nix
 
-        # https://editorconfig.org check should run AFTER all of the formatters (above)
+          # https://editorconfig.org check should run AFTER all of the formatters (above)
 - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
   rev: 3.4.0
   hooks:
   - id: editorconfig-checker
-    exclude: mvnw
+    exclude: mvnw|src/ch/vorburger/stereotype/Lifecycled.java

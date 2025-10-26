@@ -1,4 +1,4 @@
-package ch.vorburger.exec;
+package ch.vorburger.main;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

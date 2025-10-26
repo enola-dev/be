@@ -1,6 +1,7 @@
 package ch.vorburger.jvmtools;
 
-import ch.vorburger.exec.StdIO;
+import ch.vorburger.main.StdIO;
+import ch.vorburger.stereotype.Service;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.DiagnosticListener;
 import javax.tools.JavaFileObject;
 
-public class JavaCompiler implements ch.vorburger.main.Service<JavaCompiler.Input, Boolean> {
+public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
 
     // TODO Do NOT extends Task<JavaCompiler.Input, Void?> here to avoid dependency on
     // dev.enola.be.task in this module, but rather have a separate JavaCompilerTask in

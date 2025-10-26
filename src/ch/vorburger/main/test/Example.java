@@ -1,11 +1,12 @@
-package ch.vorburger.main;
+package ch.vorburger.main.test;
 
-import ch.vorburger.exec.ExecutableContext;
+import ch.vorburger.main.ExecutableContext;
+import ch.vorburger.main.Main;
 
-public class Example implements MainService {
+public class Example implements Main {
 
     public static void main(String[] args) throws Exception {
-        MainService.main(new Example(), args);
+        Main.main(new Example(), args);
     }
 
     @Override
