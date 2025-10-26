@@ -4,6 +4,7 @@ import ch.vorburger.main.StdIO;
 import ch.vorburger.stereotype.Service;
 
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.tools.Diagnostic;
@@ -18,12 +19,43 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
     // dev.enola.be.jvm module that uses this JavaCompiler class. Note that they have different
     // lifecycles - this is a Singleton service, while Task is per-invocation.
 
-    public record Input(StdIO stdIO, Sourcepath sourcepath /*, Classpath classpath*/) {}
+    // TODO Merge Input & Options into single joint record & class Builder?
+
+    public record Input(
+            StdIO stdIO, Sourcepath sourcepath /*, Classpath classpath*/, Options options) {}
+
+    public static record Options(Path outputDirectory) {
+        // TODO Support in-memory; see https://www.baeldung.com/java-string-compile-execute-code
+
+        public static class Builder {
+            private Path outputDirectory;
+
+            public Builder outputDirectory(Path outputDirectory) {
+                this.outputDirectory = outputDirectory;
+                return this;
+            }
+
+            public Builder outputDirectory(String outputDirectory) {
+                return outputDirectory(Path.of(outputDirectory));
+            }
+
+            public Options build() {
+                return new Options(outputDirectory);
+            }
+        }
+    }
 
     @Override
     public Boolean invoke(Input input) throws Exception {
         var err = input.stdIO().errWriter();
-        var options = new ArrayList<String>(); // TODO
+        var optionsList = new ArrayList<String>();
+        if (input.options != null) {
+            var options = input.options;
+            if (options.outputDirectory != null) {
+                optionsList.add("-d");
+                optionsList.add(options.outputDirectory.toString());
+            }
+        }
         var aptClasses = new ArrayList<String>(); // TODO
         var compilationUnits = input.sourcepath.getJavaFileObjects();
 
@@ -36,7 +68,7 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
                         err,
                         fileManager,
                         diagnosticListener,
-                        options,
+                        optionsList,
                         aptClasses,
                         compilationUnits);
         // TODO task.addModules(moduleNames);

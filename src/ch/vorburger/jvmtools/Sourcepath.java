@@ -15,6 +15,8 @@ import javax.tools.SimpleJavaFileObject;
 
 public class Sourcepath {
 
+    // TODO Fix perf; addClasspathResource() does new Classpath.from(classLoader) EVERY time! :(
+
     // NB: For now, the Charset is hardcoded to UTF-8; could be made configurable later, if needed.
 
     private final List<JavaFileObject> javaFileObjects = new java.util.ArrayList<>();

@@ -20,11 +20,6 @@ public abstract class Classpath {
 
     abstract URL get(String resourcePath);
 
-    public void setOutputDirectory(String string) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'setOutputDirectory'");
-    }
-
     private static class ClassLoaderClasspath extends Classpath {
         private final ClassLoader classLoader;
         private final List<URL> classpath;

@@ -12,10 +12,13 @@ public class Bootstrap {
         sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompiler.java");
         sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompilerTest.java");
 
-        // TODO var classpath = new Classpath();
-        // classpath.setOutputDirectory(".build/bootstrap-classes");
+        var options =
+                new JavaCompiler.Options.Builder()
+                        .outputDirectory(".build/bootstrap-classes")
+                        .build();
 
-        compiler.invoke(new JavaCompiler.Input(StdIO.system(), sourcepath /* TODO, classpath */));
+        compiler.invoke(
+                new JavaCompiler.Input(StdIO.system(), sourcepath /* TODO, classpath */, options));
 
         // TODO JAR
     }
