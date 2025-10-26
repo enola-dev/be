@@ -19,16 +19,33 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
     // dev.enola.be.jvm module that uses this JavaCompiler class. Note that they have different
     // lifecycles - this is a Singleton service, while Task is per-invocation.
 
-    // TODO Merge Input & Options into single joint record & class Builder?
-
     public record Input(
-            StdIO stdIO, Sourcepath sourcepath /*, Classpath classpath*/, Options options) {}
-
-    public static record Options(Path outputDirectory) {
-        // TODO Support in-memory; see https://www.baeldung.com/java-string-compile-execute-code
+            StdIO stdIO, Sourcepath sourcepath /*, Classpath classpath*/, Options options) {
 
         public static class Builder {
+            private StdIO stdIO = StdIO.system();
+            private Sourcepath sourcepath = new Sourcepath();
             private Path outputDirectory;
+
+            public Builder stdIO(StdIO stdIO) {
+                this.stdIO = stdIO;
+                return this;
+            }
+
+            // TODO Glob
+            public Builder sourceAdd(Path path) {
+                this.sourcepath.addPath(path);
+                return this;
+            }
+
+            public Sourcepath sourcepath() {
+                return sourcepath;
+            }
+
+            public Builder sourcepath(Sourcepath sourcepath) {
+                this.sourcepath = sourcepath;
+                return this;
+            }
 
             public Builder outputDirectory(Path outputDirectory) {
                 this.outputDirectory = outputDirectory;
@@ -39,11 +56,15 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
                 return outputDirectory(Path.of(outputDirectory));
             }
 
-            public Options build() {
-                return new Options(outputDirectory);
+            public Input build() {
+                var options = new Options(outputDirectory);
+                return new Input(stdIO, sourcepath, options);
             }
         }
     }
+
+    // TODO Support in-memory output; see https://www.baeldung.com/java-string-compile-execute-code
+    public static record Options(Path outputDirectory) {}
 
     @Override
     public Boolean invoke(Input input) throws Exception {

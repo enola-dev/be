@@ -8,7 +8,6 @@ import java.nio.file.Path;
 public class JavaCompilerTest {
 
     public static void main(String[] args) throws Exception {
-        var compiler = new JavaCompiler();
 
         var sourcepath = new Sourcepath();
         // sourcepath.addClasspathResource("ch/vorburger/jvmtools/Hello.java");
@@ -20,9 +19,14 @@ public class JavaCompilerTest {
         outputClassFile.delete();
         assertTrue(!outputClassFile.exists());
 
-        var options = new JavaCompiler.Options.Builder().outputDirectory(outputDirectory).build();
         var stdIO = ch.vorburger.main.StdIO.inMemory();
-        assertTrue(compiler.invoke(new JavaCompiler.Input(stdIO, sourcepath, options)) == true);
+        var input =
+                new JavaCompiler.Input.Builder()
+                        .stdIO(stdIO)
+                        .sourcepath(sourcepath)
+                        .outputDirectory(outputDirectory)
+                        .build();
+        assertTrue(new JavaCompiler().invoke(input) == true);
         stdIO.assertErrorEmpty();
 
         assertExists(outputClassFile);

@@ -1,24 +1,25 @@
 package ch.vorburger.jvmtools;
 
-import ch.vorburger.main.StdIO;
+import static ch.vorburger.test.Assert.assertTrue;
+
+import java.nio.file.Path;
 
 public class Bootstrap {
 
     public static void main(String[] args) throws Exception {
-        var compiler = new JavaCompiler();
 
-        // TODO Glob
-        var sourcepath = new Sourcepath();
-        sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompiler.java");
-        sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompilerTest.java");
+        // TODO Use a (TBD) JavaCompilerTask instead of JavaCompiler directly here...
 
-        var options =
-                new JavaCompiler.Options.Builder()
+        var input =
+                new JavaCompiler.Input.Builder()
+                        // TODO Glob
+                        .sourceAdd(Path.of("src/ch/vorburger/jvmtools/JavaCompiler.java"))
+                        .sourceAdd(Path.of("src/ch/vorburger/jvmtools/JavaCompilerTest.java"))
                         .outputDirectory(".build/bootstrap-classes")
                         .build();
+        assertTrue(new JavaCompiler().invoke(input));
 
-        compiler.invoke(
-                new JavaCompiler.Input(StdIO.system(), sourcepath /* TODO, classpath */, options));
+        // TODO Test loading and running compiled classes, in parallel!
 
         // TODO JAR
     }
