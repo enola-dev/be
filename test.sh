@@ -10,16 +10,16 @@ find src -name '*.java' ! -name '*Test.java' ! -name 'Test*.java' -print0 \
 find src \( -name '*Test.java' -o -name 'Test*.java' \) -print0 \
   | xargs -0 javac -cp .build/classes -d .build/test-classes
 
-java -ea -cp .build/classes:.build/test-classes:src ch.vorburger.main.test.ExampleTest
+java -cp .build/classes:.build/test-classes:src ch.vorburger.main.test.ExampleTest
 
-java -ea -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.ClasspathTest
-java -ea -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.SourcepathTest
-java -ea -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.JavaCompilerTest
-java -ea -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.Bootstrap
+java -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.ClasspathTest
+java -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.SourcepathTest
+java -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.JavaCompilerTest
+java -cp .build/classes:.build/test-classes:src ch.vorburger.jvmtools.Bootstrap
 
-java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.StatusTest
-java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.TaskTest
-java -ea -cp .build/classes:.build/test-classes dev.enola.be.task.TaskExecutorTest
+java -cp .build/classes:.build/test-classes dev.enola.be.task.StatusTest
+java -cp .build/classes:.build/test-classes dev.enola.be.task.TaskTest
+java -cp .build/classes:.build/test-classes dev.enola.be.task.TaskExecutorTest
 
 if command -v pre-commit &> /dev/null
 then

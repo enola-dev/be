@@ -1,5 +1,7 @@
 package dev.enola.be.task;
 
+import static ch.vorburger.test.Assert.assertTrue;
+
 import dev.enola.be.task.test.FailingTask;
 import dev.enola.be.task.test.ImmediateTask;
 import dev.enola.be.task.test.SlowTask;
@@ -30,15 +32,15 @@ public class TaskExecutorTest {
             var task = new ImmediateTask("test");
             var result = executor.await(task);
             var output = task.output().get();
-            assert result == output : "The result and output objects must be the same";
-            assert "Result: test".equals(result) : "Result should match expected output";
+            assertTrue(result == output, "The result and output objects must be the same");
+            assertTrue("Result: test".equals(result), "Result should match expected output");
 
             var toString = task.toString();
-            assert toString.contains("ImmediateTask") : "toString should contain class name";
-            assert toString.contains("id: " + task.id().toString()) : "toString should contain ID";
-            assert toString.contains("input: test") : "toString should contain input";
-            assert toString.contains("output: Result: test") : "toString should contain output";
-            assert toString.contains("status: COMPLETED") : "toString should contain COMPLETED";
+            assertTrue(toString.contains("ImmediateTask"), "toString should contain class name");
+            assertTrue(toString.contains("id: " + task.id().toString()), "toString !contains ID");
+            assertTrue(toString.contains("input: test"), "toString should contain input");
+            assertTrue(toString.contains("output: Result: test"), "toString should contain output");
+            assertTrue(toString.contains("status: COMPLETED"), "toString should contain COMPLETED");
         }
     }
 
@@ -54,18 +56,17 @@ public class TaskExecutorTest {
 
             try {
                 executor.await(task);
-                assert false : "Should have thrown an exception";
+                assertTrue(false, "Should have thrown an exception");
             } catch (Throwable e) {
                 // Expected
             }
-
-            assert task.status() == Status.FAILED : "Status should be FAILED after exception";
+            assertTrue(task.status() == Status.FAILED, "Status should be FAILED after exception");
 
             var toString = task.toString();
-            assert !toString.contains("output") : "toString should not contain output";
-            assert toString.contains("status: FAILED") : "toString should contain FAILED";
-            assert toString.contains("failure:") : "toString should contain failure:";
-            assert toString.contains("exception") : "toString should contain exception";
+            assertTrue(!toString.contains("output"), "toString should not contain output");
+            assertTrue(toString.contains("status: FAILED"), "toString should contain FAILED");
+            assertTrue(toString.contains("failure:"), "toString should contain failure:");
+            assertTrue(toString.contains("exception"), "toString should contain exception");
         }
     }
 
@@ -74,19 +75,21 @@ public class TaskExecutorTest {
             var task = new SlowTask("test", 1000, Duration.ofMillis(1));
             try {
                 executor.await(task);
-                assert false : "Should have thrown an exception due to timeout";
+                assertTrue(false, "Should have thrown an exception due to timeout");
 
             } catch (UncheckedTaskAwaitException e) {
-                assert e.getCause() instanceof CancellationException
-                        : "Cause should be CancellationException";
+                assertTrue(
+                        e.getCause() instanceof CancellationException,
+                        "Cause should be CancellationException");
                 // Expected
             }
-            assert task.status() == Status.CANCELLED
-                    : "Status should now be CANCELLED, but is " + task.status();
+            assertTrue(
+                    task.status() == Status.CANCELLED,
+                    "Status should now be CANCELLED, but is " + task.status());
 
             var toString = task.toString();
-            assert !toString.contains("output") : "toString should not contain output";
-            assert toString.contains("status: CANCELLED") : "toString should contain CANCELLED";
+            assertTrue(!toString.contains("output"), "toString should not contain output");
+            assertTrue(toString.contains("status: CANCELLED"), "toString should contain CANCELLED");
         }
     }
 
@@ -99,13 +102,14 @@ public class TaskExecutorTest {
 
             try {
                 task.await();
-                assert false : "Should have thrown CancellationException";
+                assertTrue(false, "Should have thrown CancellationException");
             } catch (UncheckedTaskAwaitException e) {
                 // Expected
             }
 
-            assert task.status() == Status.CANCELLED
-                    : "Status should be CANCELLED after cancel(), but is " + task.status();
+            assertTrue(
+                    task.status() == Status.CANCELLED,
+                    "Status should be CANCELLED after cancel(), but is " + task.status());
         }
     }
 
@@ -116,7 +120,7 @@ public class TaskExecutorTest {
             executor.async(task);
 
             var retrieved = executor.get(taskId);
-            assert retrieved.id().equals(taskId) : "Retrieved task ID should match";
+            assertTrue(retrieved.id().equals(taskId), "Retrieved task ID should match");
         }
     }
 
@@ -125,10 +129,11 @@ public class TaskExecutorTest {
             var randomId = UUID.randomUUID();
             try {
                 executor.get(randomId);
-                assert false : "Should have thrown IllegalArgumentException";
+                assertTrue(false, "Should have thrown IllegalArgumentException");
             } catch (IllegalArgumentException e) {
-                assert e.getMessage().contains("No such task")
-                        : "Error message should mention 'No such task'";
+                assertTrue(
+                        e.getMessage().contains("No such task"),
+                        "Error message should mention 'No such task'");
             }
         }
     }
@@ -142,9 +147,9 @@ public class TaskExecutorTest {
             executor.async(task2);
 
             var taskIds = executor.list();
-            assert taskIds.size() == 2 : "Should have 2 tasks, got " + taskIds.size();
-            assert taskIds.contains(task1.id()) : "Should contain task1 ID";
-            assert taskIds.contains(task2.id()) : "Should contain task2 ID";
+            assertTrue(taskIds.size() == 2, "Should have 2 tasks, got " + taskIds.size());
+            assertTrue(taskIds.contains(task1.id()), "Should contain task1 ID");
+            assertTrue(taskIds.contains(task2.id()), "Should contain task2 ID");
         }
     }
 
@@ -152,19 +157,20 @@ public class TaskExecutorTest {
         try (var executor = new TaskExecutor()) {
             var task = new SlowTask("test", 1000);
 
-            assert task.status() == Status.PENDING : "Status should be PENDING: " + task.status();
-            assert task.toString().contains("status: PENDING") : "toString !PENDING";
+            assertTrue(
+                    task.status() == Status.PENDING, "Status should be PENDING: " + task.status());
+            assertTrue(task.toString().contains("status: PENDING"), "toString !PENDING");
 
             executor.async(task);
 
             var status = task.status();
-            assert status == Status.IN_PROGRESS : "Status should be IN_PROGRESS, got " + status;
-            assert task.toString().contains("status: IN_PROGRESS") : "toString !IN_PROGRESS";
+            assertTrue(status == Status.IN_PROGRESS, "Status should be IN_PROGRESS, got " + status);
+            assertTrue(task.toString().contains("status: IN_PROGRESS"), "toString !IN_PROGRESS");
 
             task.await();
 
-            assert task.status() == Status.COMPLETED : "Final status should be COMPLETED";
-            assert task.toString().contains("status: COMPLETED") : "toString !COMPLETED";
+            assertTrue(task.status() == Status.COMPLETED, "Final status should be COMPLETED");
+            assertTrue(task.toString().contains("status: COMPLETED"), "toString !COMPLETED");
         }
     }
 
@@ -175,10 +181,11 @@ public class TaskExecutorTest {
 
             try {
                 executor.async(task);
-                assert false : "Should have thrown IllegalStateException on resubmit";
+                assertTrue(false, "Should have thrown IllegalStateException on resubmit");
             } catch (IllegalStateException e) {
-                assert e.getMessage().contains("already submitted")
-                        : "Error message should mention 'already submitted'";
+                assertTrue(
+                        e.getMessage().contains("already submitted"),
+                        "Error message should mention 'already submitted'");
             }
         }
     }
@@ -191,10 +198,11 @@ public class TaskExecutorTest {
         try (var executor2 = new TaskExecutor()) {
             try {
                 executor2.async(task);
-                assert false : "Should have thrown IllegalStateException on resubmit";
+                assertTrue(false, "Should have thrown IllegalStateException on resubmit");
             } catch (IllegalStateException e) {
-                assert e.getMessage().contains("not PENDING")
-                        : "Error message should mention 'not PENDING'";
+                assertTrue(
+                        e.getMessage().contains("not PENDING"),
+                        "Error message should mention 'not PENDING'");
             }
         }
     }
@@ -216,7 +224,7 @@ public class TaskExecutorTest {
                         }
                     };
             var threadName = executor.await(task);
-            assert threadName.equals(task.id().toString());
+            assertTrue(threadName.equals(task.id().toString()));
         }
     }
 }

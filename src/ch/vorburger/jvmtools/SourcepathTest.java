@@ -1,5 +1,7 @@
 package ch.vorburger.jvmtools;
 
+import static ch.vorburger.test.Assert.assertTrue;
+
 import java.io.IOException;
 
 public class SourcepathTest {
@@ -10,8 +12,8 @@ public class SourcepathTest {
                 SourcepathTest.class.getClassLoader(), "ch/vorburger/jvmtools/Hello.java");
         var iterator = sourcepath.getJavaFileObjects().iterator();
         var jfo = iterator.next();
-        assert jfo.getName().endsWith("/ch/vorburger/jvmtools/Hello.java");
-        assert jfo.getCharContent(false).toString().contains("public class Hello {");
-        assert iterator.hasNext() == false;
+        assertTrue(jfo.getName().endsWith("/ch/vorburger/jvmtools/Hello.java"));
+        assertTrue(jfo.getCharContent(false).toString().contains("public class Hello {"));
+        assertTrue(iterator.hasNext() == false);
     }
 }

@@ -1,6 +1,6 @@
 package ch.vorburger.jvmtools;
 
-import static ch.vorburger.jvmtools.Assert.assertTrue;
+import static ch.vorburger.test.Assert.assertTrue;
 
 public class ClasspathTest {
 

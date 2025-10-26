@@ -1,5 +1,7 @@
 package ch.vorburger.main.test;
 
+import static ch.vorburger.test.Assert.assertTrue;
+
 import ch.vorburger.main.MainTester;
 
 public class ExampleTest {
@@ -8,7 +10,7 @@ public class ExampleTest {
 
     public static void main(String[] args) throws Exception {
         var result = t.test(new Example(), "world");
-        assert result.exitCode() == 123;
-        assert "hello, world\n".equals(result.stdout());
+        assertTrue(result.exitCode() == 123);
+        assertTrue("hello, world\n".equals(result.stdout()));
     }
 }

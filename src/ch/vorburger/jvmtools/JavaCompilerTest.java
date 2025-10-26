@@ -1,7 +1,7 @@
 package ch.vorburger.jvmtools;
 
-import static ch.vorburger.jvmtools.Assert.assertExists;
-import static ch.vorburger.jvmtools.Assert.assertTrue;
+import static ch.vorburger.test.Assert.assertExists;
+import static ch.vorburger.test.Assert.assertTrue;
 
 import java.nio.file.Path;
 
