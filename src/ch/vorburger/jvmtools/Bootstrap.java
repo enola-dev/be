@@ -2,7 +2,7 @@ package ch.vorburger.jvmtools;
 
 import static ch.vorburger.test.Assert.assertTrue;
 
-import java.nio.file.Path;
+import dev.enola.be.io.FileSet;
 
 public class Bootstrap {
 
@@ -12,9 +12,7 @@ public class Bootstrap {
 
         var input =
                 new JavaCompiler.Input.Builder()
-                        // TODO FileSet Glob
-                        .source(Path.of("src/ch/vorburger/jvmtools/JavaCompiler.java"))
-                        .source(Path.of("src/ch/vorburger/jvmtools/JavaCompilerTest.java"))
+                        .sources(new FileSet.Builder().addRoot("src").includeGlob("**/*.java"))
                         .outputDirectory(".build/bootstrap-classes")
                         .build();
         assertTrue(new JavaCompiler().invoke(input));

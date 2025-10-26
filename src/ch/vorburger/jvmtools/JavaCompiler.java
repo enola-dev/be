@@ -3,6 +3,8 @@ package ch.vorburger.jvmtools;
 import ch.vorburger.main.StdIO;
 import ch.vorburger.stereotype.Service;
 
+import dev.enola.be.io.FileSet;
+
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,7 +35,12 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
                 return this;
             }
 
-            public Builder source(Stream<Path> paths) {
+            public Builder sources(FileSet.Builder fileSetBuilder) {
+                sources(fileSetBuilder.build().stream());
+                return this;
+            }
+
+            public Builder sources(Stream<Path> paths) {
                 // TODO Optimization: Keep Stream, and start compiling right away from it...
                 paths.forEach(this.sourcepath::addPath);
                 return this;

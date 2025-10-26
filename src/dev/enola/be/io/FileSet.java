@@ -49,6 +49,11 @@ public record FileSet(Set<Path> roots, List<PathMatcher> includes, List<PathMatc
             return this;
         }
 
+        public Builder addRoot(String root) {
+            this.roots.add(Path.of(root));
+            return this;
+        }
+
         public Builder includeGlob(String pattern) {
             this.includes.add(FileSystems.getDefault().getPathMatcher("glob:" + pattern));
             return this;
