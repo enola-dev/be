@@ -14,8 +14,8 @@ public class FileSetTest {
         var fileSet =
                 new FileSet.Builder()
                         .addRoot(Path.of("src/dev/enola/be"))
-                        .addInclude("io/File*.java")
-                        .addExclude("**/File*Test.java")
+                        .includeGlob("io/File*.java")
+                        .excludeGlob("**/File*Test.java")
                         .build();
 
         var paths = fileSet.stream().toList();

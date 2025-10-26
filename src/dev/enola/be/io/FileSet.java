@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
  * https://github.com/enola-dev/enola/blob/main/java/dev/enola/common/io/resource/stream/FileGlobResolver.java
  * ">Enola.dev's FileGlobResolver</a>.
  */
-public record FileSet(Set<Path> roots, List<String> includes, List<String> excludes) {
+public record FileSet(Set<Path> roots, List<PathMatcher> includes, List<PathMatcher> excludes) {
 
     // https://github.com/enola-dev/enola/tree/main/java/dev/enola/common/io/resource/stream
 
@@ -40,21 +41,31 @@ public record FileSet(Set<Path> roots, List<String> includes, List<String> exclu
 
     public static class Builder {
         private final Set<Path> roots = new java.util.HashSet<>();
-        private final List<String> includes = new java.util.ArrayList<>();
-        private final List<String> excludes = new java.util.ArrayList<>();
+        private final List<PathMatcher> includes = new java.util.ArrayList<>();
+        private final List<PathMatcher> excludes = new java.util.ArrayList<>();
 
         public Builder addRoot(Path root) {
             this.roots.add(root);
             return this;
         }
 
-        public Builder addInclude(String pattern) {
-            this.includes.add(pattern);
+        public Builder includeGlob(String pattern) {
+            this.includes.add(FileSystems.getDefault().getPathMatcher("glob:" + pattern));
             return this;
         }
 
-        public Builder addExclude(String pattern) {
-            this.excludes.add(pattern);
+        public Builder includeRegEx(String pattern) {
+            this.includes.add(FileSystems.getDefault().getPathMatcher("regex:" + pattern));
+            return this;
+        }
+
+        public Builder excludeGlob(String pattern) {
+            this.excludes.add(FileSystems.getDefault().getPathMatcher("glob:" + pattern));
+            return this;
+        }
+
+        public Builder excludeRegEx(String pattern) {
+            this.excludes.add(FileSystems.getDefault().getPathMatcher("regex:" + pattern));
             return this;
         }
 
@@ -73,20 +84,13 @@ public record FileSet(Set<Path> roots, List<String> includes, List<String> exclu
         }
 
         public FileSet build() {
-            return new FileSet(Set.copyOf(roots), List.copyOf(includes), List.copyOf(excludes));
+            return new FileSet(Set.copyOf(roots), includes, excludes);
         }
     }
 
     public Stream<Path> stream() {
-        var includeMatchers =
-                includes.stream()
-                        .map(pattern -> FileSystems.getDefault().getPathMatcher("glob:" + pattern))
-                        .toList();
-        var excludeMatchers =
-                excludes.stream()
-                        .map(pattern -> FileSystems.getDefault().getPathMatcher("glob:" + pattern))
-                        .toList();
-
+        // TODO
+        // https://github.com/enola-dev/enola/blob/main/java/dev/enola/common/function/MoreStreams.java ?
         return roots.stream()
                 .flatMap(
                         root -> {
@@ -97,10 +101,10 @@ public record FileSet(Set<Path> roots, List<String> includes, List<String> exclu
                                                 path -> {
                                                     var relativePath = root.relativize(path);
 
-                                                    if (!includeMatchers.isEmpty()) {
+                                                    if (!includes.isEmpty()) {
                                                         var included = false;
-                                                        for (var matcher : includeMatchers) {
-                                                            if (matcher.matches(relativePath)) {
+                                                        for (var include : includes) {
+                                                            if (include.matches(relativePath)) {
                                                                 included = true;
                                                                 break;
                                                             }
@@ -108,8 +112,8 @@ public record FileSet(Set<Path> roots, List<String> includes, List<String> exclu
                                                         if (!included) return false;
                                                     }
 
-                                                    for (var matcher : excludeMatchers) {
-                                                        if (matcher.matches(relativePath)) {
+                                                    for (var exclude : excludes) {
+                                                        if (exclude.matches(relativePath)) {
                                                             return false;
                                                         }
                                                     }
