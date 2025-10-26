@@ -1,5 +1,7 @@
 package ch.vorburger.jvmtools;
 
+import ch.vorburger.main.StdIO;
+
 public class Bootstrap {
 
     public static void main(String[] args) throws Exception {
@@ -7,13 +9,13 @@ public class Bootstrap {
 
         // TODO Glob
         var sourcepath = new Sourcepath();
-        sourcepath.addResource("ch/vorburger/jvmtools/JavaCompiler.java");
-        sourcepath.addResource("ch/vorburger/jvmtools/JavaCompilerTest.java");
+        sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompiler.java");
+        sourcepath.addClasspathResource("ch/vorburger/jvmtools/JavaCompilerTest.java");
 
-        var classpath = new Classpath();
-        classpath.setOutputDirectory(".build/bootstrap-classes");
+        // TODO var classpath = new Classpath();
+        // classpath.setOutputDirectory(".build/bootstrap-classes");
 
-        // TODO compiler.invoke(new JavaCompiler.Input(StdIO.system(), sourcepath, classpath));
+        compiler.invoke(new JavaCompiler.Input(StdIO.system(), sourcepath /* TODO, classpath */));
 
         // TODO JAR
     }

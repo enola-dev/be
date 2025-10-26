@@ -18,7 +18,7 @@ public class JavaCompiler implements Service<JavaCompiler.Input, Boolean> {
     // dev.enola.be.jvm module that uses this JavaCompiler class. Note that they have different
     // lifecycles - this is a Singleton service, while Task is per-invocation.
 
-    public record Input(StdIO stdIO, Sourcepath sourcepath, Classpath classpath) {}
+    public record Input(StdIO stdIO, Sourcepath sourcepath /*, Classpath classpath*/) {}
 
     @Override
     public Boolean invoke(Input input) throws Exception {
